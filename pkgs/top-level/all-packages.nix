@@ -3485,6 +3485,8 @@ in
 
   tldr = callPackage ../tools/misc/tldr { };
 
+  tlspool = callPackage ../tools/networking/tlspool { };
+
   tmate = callPackage ../tools/misc/tmate { };
 
   tmpwatch = callPackage ../tools/misc/tmpwatch  { };
