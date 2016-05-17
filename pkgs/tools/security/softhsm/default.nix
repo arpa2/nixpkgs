@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, botan }:
+{ stdenv, fetchurl, botan, autoreconfHook }:
 
 stdenv.mkDerivation rec {
 
@@ -17,7 +17,15 @@ stdenv.mkDerivation rec {
     "--localstatedir=$out/var"
     ];
 
+  nativeBuildInputs = [ autoreconfHook ];
   buildInputs = [ botan ];
+
+  patches = map fetchurl [
+  {
+    url = "https://github.com/opendnssec/SoftHSMv2/files/197297/softhsmtokendir-stickybit.patch.txt";
+    sha256 = "1bxdrr824qldqgqs3h3im4wxqcdp009m29aia0293pmxbfspkgd5";
+  }
+  ];
 
   postInstall = "rm -rf $out/var";
 
