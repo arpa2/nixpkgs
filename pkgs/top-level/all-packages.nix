@@ -3066,6 +3066,8 @@ in
 
   qshowdiff = callPackage ../tools/text/qshowdiff { };
 
+  quickder = callPackage ../development/libraries/quickder { };
+
   quicktun = callPackage ../tools/networking/quicktun { };
 
   quilt = callPackage ../development/tools/quilt { };
@@ -12897,6 +12899,8 @@ in
   hexcurse = callPackage ../applications/editors/hexcurse { };
 
   hexedit = callPackage ../applications/editors/hexedit { };
+
+  hexio = callPackage ../development/tools/hexio { };
 
   hipchat = callPackage ../applications/networking/instant-messengers/hipchat { };
 
