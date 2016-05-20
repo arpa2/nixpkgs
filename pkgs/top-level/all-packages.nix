@@ -448,6 +448,10 @@ in
 
   asciinema = goPackages.asciinema.bin // { outputs = [ "bin" ]; };
 
+  asn1ate = callPackage ../development/tools/asn1ate { };
+
+  asn2quickder = callPackage ../development/tools/asn2quickder { };
+
   asymptote = callPackage ../tools/graphics/asymptote {
     texLive = texlive.combine { inherit (texlive) scheme-small epsf cm-super; };
     gsl = gsl_1;

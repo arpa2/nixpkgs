@@ -1,18 +1,23 @@
-{ stdenv, fetchFromGitHub, fetchurl, hexio, python }:
+{ stdenv, fetchFromGitHub, fetchurl, hexio, python, which, asn2quickder }:
 
 stdenv.mkDerivation rec {
   pname = "quickder";
   name = "${pname}-${version}";
-  version = "0.1-RC1";
+  version = "0.1-RC2";
 
   src = fetchFromGitHub {
-    sha256 = "1p7n1z5k6y8lg1dp5d45zsak6m8daq4gmgrsl0f53y3ciwz1f89k";
-    rev = "version-${version}";
+    sha256 = "1893wk2pkl20gxyrzd99y2vyiqdl55ln8qkz715rvm1m3clicbh3";
+    rev = "a09680a4cadfd674dcb28c887f7ed954b20423bf";
     owner = "vanrein";
     repo = "quick-der";
   };
 
-  buildInputs = [ python hexio ];
+  buildInputs = [ python hexio which asn2quickder];
+
+  patchPhase = ''
+    substituteInPlace Makefile \
+      --replace 'lib tool test rfc' 'lib test rfc' 
+    '';
 
   installPhase = ''
     mkdir -p $out/bin $out/lib $out/sbin $out/man
