@@ -6,8 +6,8 @@ stdenv.mkDerivation rec {
   version = "201605";
 
   src = fetchFromGitHub {
-    sha256 = "0zz0d1j3srp0iyh6wn9mczn7w4pbnaimrgdldkkb5wwzcm40caxa";
-    rev = "dcc5f9ca71bde24fd8ad7a47ea86f8bd221b7103";
+    sha256 = "08jxkdi0gjsi8s793f9kdlad0a58a0xpsaayrsnpn9bpmm5cgihq";
+    rev = "f6f963bd0fcd2808977e0ad82dcb3100691cdd7c";
     owner = "vanrein";
     repo = "hexio";
   };
