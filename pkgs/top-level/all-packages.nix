@@ -7171,6 +7171,10 @@ in
     guileBindings = config.gnutls.guile or false;
   };
 
+  gnutlskdh = callPackage ../development/libraries/gnutls/gnutlskdh.nix {
+    guileBindings = config.gnutls.guile or false;
+  };
+
   gnutls34 = callPackage ../development/libraries/gnutls/3.4.nix {
     guileBindings = config.gnutls.guile or false;
   };
