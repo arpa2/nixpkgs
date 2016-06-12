@@ -1,18 +1,20 @@
 # Nix recipe for TLS Pool. 
 
 { stdenv, fetchurl, unzip, libtool, pkgconfig, git, gnutls, p11_kit,
-  libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash 
+  libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
+  python
 }:   
 
 let 
   pname = "tlspool";
-  version = "20160420";
+  version = "20160612";
 in
 
 stdenv.mkDerivation {
   name = "${pname}-${version}";
-  src = ./../../../../../../software/tlspool/. ;
+  src = ./../../../../../tlspool/. ;
 
+  propagatedBuildInputs = [ python ];
   buildInputs = [ pkgconfig unzip git gnutls p11_kit libtasn1 db openldap
   libmemcached cyrus_sasl openssl softhsm bash ];
 
