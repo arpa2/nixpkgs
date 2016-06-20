@@ -811,6 +811,8 @@ in
 
   heatseeker = callPackage ../tools/misc/heatseeker { };
 
+  hexio = callPackage ../development/tools/hexio { };
+
   interlock = callPackage ../servers/interlock {};
 
   mathics = pythonPackages.mathics;
