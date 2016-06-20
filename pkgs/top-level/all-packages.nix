@@ -424,6 +424,8 @@ in
 
   asciinema = callPackage ../tools/misc/asciinema {};
 
+  asn2quickder = callPackage ../development/tools/asn2quickder {};
+
   asymptote = callPackage ../tools/graphics/asymptote {
     texLive = texlive.combine { inherit (texlive) scheme-small epsf cm-super; };
     gsl = gsl_1;
