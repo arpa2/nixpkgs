@@ -3,16 +3,16 @@
 stdenv.mkDerivation rec {
   pname = "quickder";
   name = "${pname}-${version}";
-  version = "0.1-RC2";
+  version = "0.1-RC5";
 
   src = fetchFromGitHub {
-    sha256 = "1893wk2pkl20gxyrzd99y2vyiqdl55ln8qkz715rvm1m3clicbh3";
-    rev = "a09680a4cadfd674dcb28c887f7ed954b20423bf";
+    sha256 = "0azasql4q6nyig23w9mca4vfn84ircwy9vr7s626ky5aahgni7fb";
+    rev = "version-${version}";
     owner = "vanrein";
     repo = "quick-der";
   };
 
-  buildInputs = [ python hexio which asn2quickder];
+  buildInputs = [ python which asn2quickder];
 
   patchPhase = ''
     substituteInPlace Makefile \
