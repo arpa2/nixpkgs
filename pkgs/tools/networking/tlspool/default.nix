@@ -1,6 +1,6 @@
 # Nix recipe for TLS Pool. 
 
-{ stdenv, fetchurl, unzip, libtool, pkgconfig, git, gnutls, p11_kit,
+{ stdenv, fetchurl, unzip, libtool, pkgconfig, git, gnutls35, p11_kit,
   libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
   python, ldns, unbound, quickder, libkrb5
 }:   
@@ -15,8 +15,8 @@ stdenv.mkDerivation {
   src = ./../../../../../tlspool/. ;
 
   propagatedBuildInputs = [ python ];
-  buildInputs = [ pkgconfig unzip git gnutls p11_kit libtasn1 db openldap
-  libmemcached cyrus_sasl openssl softhsm bash unbound quickder libkrb5 ];
+  buildInputs = [ pkgconfig unzip git gnutls35 p11_kit libtasn1 db openldap
+  libmemcached cyrus_sasl openssl softhsm bash unbound quickder libkrb5 ldns ];
 
   phases = [ "unpackPhase" "buildPhase" "installPhase" ];
   
