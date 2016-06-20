@@ -2,7 +2,7 @@
 
 { stdenv, fetchurl, unzip, libtool, pkgconfig, git, gnutls, p11_kit,
   libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
-  python
+  python, ldns, unbound, quickder, libkrb5
 }:   
 
 let 
@@ -16,7 +16,7 @@ stdenv.mkDerivation {
 
   propagatedBuildInputs = [ python ];
   buildInputs = [ pkgconfig unzip git gnutls p11_kit libtasn1 db openldap
-  libmemcached cyrus_sasl openssl softhsm bash ];
+  libmemcached cyrus_sasl openssl softhsm bash unbound quickder libkrb5 ];
 
   phases = [ "unpackPhase" "buildPhase" "installPhase" ];
   
