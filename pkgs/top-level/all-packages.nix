@@ -424,6 +424,8 @@ in
 
   asciinema = callPackage ../tools/misc/asciinema {};
 
+  asn1ate = callPackage ../development/tools/asn1ate {};
+
   asn2quickder = callPackage ../development/tools/asn2quickder {};
 
   asymptote = callPackage ../tools/graphics/asymptote {
