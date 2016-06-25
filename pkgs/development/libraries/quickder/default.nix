@@ -6,8 +6,9 @@ stdenv.mkDerivation rec {
   version = "0.1-RC5";
 
   src = fetchFromGitHub {
-    sha256 = "0azasql4q6nyig23w9mca4vfn84ircwy9vr7s626ky5aahgni7fb";
-    rev = "version-${version}";
+    sha256 = "0dslqvf28jpm7vv6mggwqpgc9xww1146crm73igrm5lyg9700cj4";
+    rev = "31acbe67846f5e0ba3d1728ee30287f03f8857e4";
+    # rev = "version-${version}";
     owner = "vanrein";
     repo = "quick-der";
   };
