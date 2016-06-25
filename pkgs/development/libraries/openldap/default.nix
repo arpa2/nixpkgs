@@ -1,7 +1,7 @@
-{ stdenv, fetchurl, openssl, cyrus_sasl, db, groff }:
+{ stdenv, fetchurl, openssl, cyrus_sasl, db, groff, buildStaticLibraries ? true }:
 
 stdenv.mkDerivation rec {
-  name = "openldap-2.4.44";
+  name = "openldap-2.4.44a";
 
   src = fetchurl {
     url = "http://www.openldap.org/software/download/OpenLDAP/openldap-release/${name}.tgz";
@@ -18,7 +18,8 @@ stdenv.mkDerivation rec {
       "--disable-dependency-tracking"   # speeds up one-time build
     ] ++ stdenv.lib.optional (openssl == null) "--without-tls"
       ++ stdenv.lib.optional (cyrus_sasl == null) "--without-cyrus-sasl"
-      ++ stdenv.lib.optional stdenv.isFreeBSD "--with-pic";
+      ++ stdenv.lib.optional stdenv.isFreeBSD "--with-pic"
+      ++ stdenv.lib.optional buildStaticLibraries "--enable-static";
 
   dontPatchELF = 1; # !!!
 
