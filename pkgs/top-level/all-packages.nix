@@ -4106,6 +4106,7 @@ in
 
   zxing = callPackage ../tools/graphics/zxing {};
 
+  tunnel6bed4 = callPackage ../tools/networking/6bed4 { };
 
   ### SHELLS
 
