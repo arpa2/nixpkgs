@@ -2654,6 +2654,8 @@ in
 
   mpack = callPackage ../tools/networking/mpack { };
 
+  opendnssec = callPackage ../tools/networking/opendnssec { };
+
   pa_applet = callPackage ../tools/audio/pa-applet { };
 
   pasystray = callPackage ../tools/audio/pasystray { };
