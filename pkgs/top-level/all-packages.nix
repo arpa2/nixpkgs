@@ -14349,6 +14349,8 @@ in
     curses = ncurses;
   };
 
+  steamworks = callPackage ../misc/steamworks { };
+
   stella = callPackage ../misc/emulators/stella { };
 
   statsd = callPackage ../tools/networking/statsd {
