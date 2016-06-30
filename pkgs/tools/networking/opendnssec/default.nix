@@ -1,5 +1,5 @@
 { stdenv, fetchFromGitHub, pkgconfig, autoreconfHook, ldns, sqlite,
-  libxml2, jre, libtool }:
+  libxml2, jre, libtool, softhsm, openssl, gettext }:
 
 with stdenv.lib;
 
@@ -16,9 +16,27 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ pkgconfig autoreconfHook ];
 
-  buildInputs = [ libtool ldns sqlite libxml2 jre ]; # ++ optional stdenv.isLinux systemd;
+  buildInputs = [ gettext libtool ldns sqlite libxml2 jre ]; # ++ optional stdenv.isLinux systemd;
 
-  preconfigurePhase = "autogen.sh";
+  patchPhase = ''
+  substituteInPlace configure.ac "ACX_LDNS" "#ACX_LDNS" 
+  '';
+
+
+  preconfigurePhase = ''
+    autogen.sh
+    export LDNS_CONFIG=${ldns}/bin/ldns-config
+    '';
+ 
+/*
+  configureFlags = ''
+    --with-ldns=${ldns}/lib
+    --with-libxml2=${libxml2}/lib/libxml2.so
+    --with-pkcs11-softhsm=${softhsm}/lib
+    --with-ssl=${openssl}/lib
+    --with-gnu-ld
+    '';
+*/
 
   outputs = [ "out" "man" ];
 
