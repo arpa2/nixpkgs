@@ -8,7 +8,7 @@
 
 let
   gnutls = pkgs.appendToName "static" (pkgs.lib.overrideDerivation pkgs.gnutls35 (a: {
-  configureFlagsArray = ("--enable-static"); }));
+  configureFlagsArray = ("--enable-static"); doCheck = false; }));
 in
 
 let
