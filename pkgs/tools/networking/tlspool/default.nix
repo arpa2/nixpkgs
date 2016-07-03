@@ -2,28 +2,35 @@
 
 { pkgs, stdenv, fetchurl, unzip, libtool, pkgconfig, git, p11_kit,
   libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
-  python, libkrb5, quickder, unbound, ldns,
-  useSystemd ? true, systemd
+  python, libkrb5, quickder, unbound, ldns, gnupg, useSystemd ? true, systemd
 }:
 
-let
-  gnutls = pkgs.appendToName "static" (pkgs.lib.overrideDerivation pkgs.gnutls35 (a: {
-  configureFlagsArray = ("--enable-static"); doCheck = false; }));
-in
+#let
+#  gnutls_ = pkgs.appendToName "static" (pkgs.lib.overrideDerivation pkgs.gnutls35 (a: {
+#  configureFlagsArray = ("--enable-static"); doCheck = false; checkphase = " "; }));
+#in
+
+#let
+#  gnupg_ = pkgs.appendToName "thin" (pkgs.lib.overrideDerivation pkgs.gnupg21 (a: {
+#  gnutlsSupport = false; x11Support = false;  adnsSupport = false;
+#  usbSupport = false; openldapSupport = false; bzip2Support = false; 
+#  readlineSupport = false; zlibSupport = false; gnutls = gnutls_; }));
+#in
 
 let
   pname = "tlspool";
-  version = "20160626";
+  version = "20160701";
+  gnutls_ = pkgs.gnutls35;
 in
 
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "${pname}-${version}";
   src = ./../../../../../tlspool/. ;
 
-  propagatedBuildInputs = [ python unbound softhsm openldap ];
-  buildInputs = [ pkgconfig unzip git gnutls p11_kit.dev libtasn1 db
-  libmemcached cyrus_sasl openssl bash quickder libkrb5 ldns libtool ]
-  ++ stdenv.lib.optional useSystemd systemd;
+  propagatedBuildInputs = [ python unbound softhsm openldap gnutls35 p11_kit.dev p11_kit.out gnupg ]; 
+  buildInputs = [ pkgconfig unzip git libtasn1 db libmemcached cyrus_sasl openssl bash quickder 
+                  libkrb5 ldns libtool ]
+                ++ stdenv.lib.optional useSystemd systemd;
 
   phases = [ "unpackPhase" "patchPhase" "buildPhase" "installPhase" ];
 
@@ -47,6 +54,11 @@ stdenv.mkDerivation {
     make DESTDIR=$out PREFIX=/ install
     cp -R etc/* $out/etc/tlspool/
     '';
+
+    shellHook = ''
+     export NIX_PATH="nixpkgs=${toString <nixpkgs>}"
+     export COMMANDDIR=$out/sbin
+  '';
 
   meta = with stdenv.lib; {
     description = "A supercharged TLS daemon that allows for easy, strong and consistent deployment";
