@@ -2,7 +2,8 @@
 
 { pkgs, stdenv, fetchurl, unzip, libtool, pkgconfig, git, p11_kit,
   libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
-  python, libkrb5, quickder, unbound, ldns, gnupg, useSystemd ? true, systemd
+  python, libkrb5, quickder, unbound, ldns, gnupg, gnutls35,
+  useSystemd ? true, systemd
 }:
 
 #let
