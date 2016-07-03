@@ -1,5 +1,5 @@
-{ fetchurl, stdenv, pkgconfig
-, libgpgerror, libassuan, libcap ? null, ncurses ? null, gtk2 ? null, qt4 ? null
+{ fetchurl, stdenv, pkgconfig , libgpgerror, libassuan, libcap ? null, 
+  ncurses ? null, gtk2 ? null, qt4 ? null
 }:
 
 let
@@ -17,7 +17,10 @@ stdenv.mkDerivation rec {
     sha256 = "1cp7wjqr6nx31mdclr61s2h84ijqjl0ph99kgj4vyawpjj1j1633";
   };
 
-  buildInputs = [ libgpgerror libassuan libcap gtk2 ncurses qt4 ];
+  buildInputs = [ libgpgerror libassuan libcap ]
+   ++ optional (gtk2 != null) gtk2
+   ++ optional (qt4 != null) qt4
+   ++ optional (ncurses != null) ncurses;
 
   prePatch = ''
     substituteInPlace pinentry/pinentry-curses.c --replace ncursesw ncurses
