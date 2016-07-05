@@ -14351,6 +14351,8 @@ in
 
   steamworks = callPackage ../misc/steamworks { };
 
+  steamworks-demo = callPackage ../misc/steamworks/demo.nix { };
+
   stella = callPackage ../misc/emulators/stella { };
 
   statsd = callPackage ../tools/networking/statsd {

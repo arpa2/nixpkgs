@@ -1,11 +1,11 @@
-# Nix recipe for ARPA2 Steamworks.
+# Nix recipe for ARPA2 Steamworks demo.
 
 { pkgs, stdenv, fetchurl, cmake, openldap, sqlite, log4cpp, fcgi,
-  pkgconfig, flex, flexcpp, bison, nginx
+  pkgconfig, flex, flexcpp, bison, nginx, steamworks
 }:
 
 let
-  pname = "steamworks";
+  pname = "steamworks-demo";
   version = "20160704";
 in
 
@@ -13,27 +13,22 @@ stdenv.mkDerivation {
   name = "${pname}-${version}";
   src = ./../../../../steamworks/. ;
 
-  propagatedBuildInputs = [ ];
-  buildInputs = [ pkgconfig openldap sqlite cmake flex bison flexcpp log4cpp nginx ];
+  propagatedBuildInputs = [ steamworks nginx ];
+  buildInputs = [ pkgconfig openldap sqlite cmake flex bison flexcpp log4cpp ];
 
   dontUseCmakeBuildDir = true;
   dontFixCmake = true;
 
   phases = [ "unpackPhase" "buildPhase" "installPhase" ];
 
-  buildPhase = ''
-    make build
-  '';
-
   installPhase = ''
     mkdir -p $out/bin $out/lib $out/sbin $out/man $out/share/steamworks
-    cd build
-    cp crank/crank pulley/pulley shaft/shaft $out/bin
-    cp common/lib* $out/lib
-    '';
+    cd src/frontend
+    make CGI_SOCKET_DIR="$out/share/steamworks"
+  '';
 
   meta = with stdenv.lib; {
-    description = "Configuration information distributed over LDAP in near realtime";
+    description = "ARPA2 Steamworks demonstration";
     license = licenses.bsd2;
     homepage = https://www.arpa2.net;
     maintainers = with maintainers; [ leenaars ];
