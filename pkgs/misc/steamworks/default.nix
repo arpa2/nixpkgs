@@ -1,7 +1,7 @@
 # Nix recipe for ARPA2 Steamworks.
 
 { pkgs, stdenv, fetchurl, cmake, openldap, sqlite, log4cpp, fcgi,
-  pkgconfig, flex, flexcpp, bison, nginx
+  pkgconfig, flex, bison
 }:
 
 let
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   src = ./../../../../steamworks/. ;
 
   propagatedBuildInputs = [ ];
-  buildInputs = [ pkgconfig openldap sqlite cmake flex bison flexcpp log4cpp nginx ];
+  buildInputs = [ pkgconfig openldap sqlite cmake flex bison log4cpp ];
 
   dontUseCmakeBuildDir = true;
   dontFixCmake = true;
@@ -26,10 +26,12 @@ stdenv.mkDerivation {
   '';
 
   installPhase = ''
-    mkdir -p $out/bin $out/lib $out/sbin $out/man $out/share/steamworks
+    mkdir -p $out/bin $out/lib $out/share/man
     cd build
-    cp crank/crank pulley/pulley shaft/shaft $out/bin
-    cp common/lib* $out/lib
+    cp crank/crank pulley/pulley shaft/shaft 3rdparty/fcgi-*/cgi-fcgi $out/bin
+#   cp common/lib* 3rdparty/fcgi*/libfcgi.a pulley/pulleyscript/lib* $out/lib
+    cp pulley/pulleyscript/compiler $out/bin/compiler_pulleyscript
+    cp pulley/pulleyscript/simple $out/bin/simple_pulleyscript
     '';
 
   meta = with stdenv.lib; {
