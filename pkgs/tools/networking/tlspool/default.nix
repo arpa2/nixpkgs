@@ -20,7 +20,7 @@
 
 let
   pname = "tlspool";
-  version = "20160701";
+  version = "20160706";
   gnutls_ = pkgs.gnutls35;
 in
 
@@ -50,10 +50,12 @@ stdenv.mkDerivation rec {
 '';
 
   installPhase = ''
-    mkdir -p $out/bin $out/lib $out/sbin $out/man $out/etc/tlspool/ $out/include/${pname}
+    mkdir -p $out/bin $out/lib $out/sbin $out/man $out/etc/tlspool/ $out/include/${pname}/pulleyback
     make DESTDIR=$out PREFIX=/ all
     make DESTDIR=$out PREFIX=/ install
     cp -R etc/* $out/etc/tlspool/
+    cp include/tlspool/*.h $out/include/${pname}
+    cp pulleyback/*.h $out/include/${pname}/pulleyback/
     cp src/*.h $out/include/${pname}
     '';
 
