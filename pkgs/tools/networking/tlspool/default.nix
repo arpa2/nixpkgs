@@ -14,7 +14,7 @@
 #let
 #  gnupg_ = pkgs.appendToName "thin" (pkgs.lib.overrideDerivation pkgs.gnupg21 (a: {
 #  gnutlsSupport = false; x11Support = false;  adnsSupport = false;
-#  usbSupport = false; openldapSupport = false; bzip2Support = false; 
+#  usbSupport = false; openldapSupport = false; bzip2Support = false;
 #  readlineSupport = false; zlibSupport = false; gnutls = gnutls_; }));
 #in
 
@@ -28,8 +28,8 @@ stdenv.mkDerivation rec {
   name = "${pname}-${version}";
   src = ./../../../../../tlspool/. ;
 
-  propagatedBuildInputs = [ python unbound softhsm openldap gnutls35 p11_kit.dev p11_kit.out gnupg ]; 
-  buildInputs = [ pkgconfig unzip git libtasn1 db libmemcached cyrus_sasl openssl bash quickder 
+  propagatedBuildInputs = [ python unbound softhsm openldap gnutls35 p11_kit.dev p11_kit.out gnupg ];
+  buildInputs = [ pkgconfig unzip git libtasn1 db libmemcached cyrus_sasl openssl bash quickder
                   libkrb5 ldns libtool ]
                 ++ stdenv.lib.optional useSystemd systemd;
 
@@ -43,17 +43,18 @@ stdenv.mkDerivation rec {
       --replace "-lldns" "-L${ldns}/lib -lldns" \
       --replace "-lsystemd" "-L${systemd}/lib -lsystemd" \
       --replace "\$(UNBOUND_LIBS)" "-L${unbound.lib}/lib -lunbound" \
-      --replace "\$(UNBOUND_CFLAGS)" "-I${unbound.lib}/include" 
+      --replace "\$(UNBOUND_CFLAGS)" "-I${unbound.lib}/include"
       substituteInPlace etc/tlspool.conf \
       --replace "dnssec_rootkey ../etc/root.key" "dnssec_rootkey $out/etc/root.key" \
       --replace "pkcs11_path /usr/local/lib/softhsm/libsofthsm2.so" "pkcs11_path ${softhsm}/lib/softhsm/libsofthsm2.so"
 '';
 
   installPhase = ''
-    mkdir -p $out/bin $out/lib $out/sbin $out/man $out/etc/tlspool/
+    mkdir -p $out/bin $out/lib $out/sbin $out/man $out/etc/tlspool/ $out/include/${pname}
     make DESTDIR=$out PREFIX=/ all
     make DESTDIR=$out PREFIX=/ install
     cp -R etc/* $out/etc/tlspool/
+    cp src/*.h $out/include/${pname}
     '';
 
     shellHook = ''
