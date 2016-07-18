@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, fetchFromGitHub }:
+{ stdenv, fetchurl, nettools, iproute, procps, fetchFromGitHub }:
 
 let
   version = "alpha2";
@@ -18,6 +18,14 @@ stdenv.mkDerivation {
 #    rev = "${version}";
 #    sha256 = "0dab7x3mhhvbply14m9q3lq8dq0gwa3m2jzywlisg057xc1mpyj7";
 #  };
+
+  patchPhase = ''
+   substituteInPlace *.c \
+      --replace "/sbin/ifconfig" "${nettools}/bin/ifconfig" \
+      --replace "/sbin/route"    "${nettools}/bin/route" \
+      --replace "/sbin/ip"       "${iproute}/sbin/ip" \
+      --replace "/sbin/sysctl"   "${procps}/sbin/sysctl"
+    '';
 
   installPhase = ''
     mkdir -p $out/bin $out/man
