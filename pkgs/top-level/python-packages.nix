@@ -22720,6 +22720,47 @@ in modules // {
     };
   };
 
+  tlspool = buildPythonPackage rec {
+    pname = "tlspool";
+    name = "${pname}-${version}";
+    version = "20160722";
+
+    src = ./../../../tlspool/. ;
+
+    propagatedBuildInputs = with self; [ pkgs.tlspool pkgs.swig self.wrapPython ];
+
+    sourceRoot = "tlspool/lib/python";
+
+    patchPhase = ''
+        substituteInPlace Makefile \
+        --replace "python setup.py install" "pip install --target=$out/${python.sitePackages} --no-cache-dir . "
+    '';
+
+    buildPhase = ''
+      mkdir -p $out/bin $out/${python.sitePackages}
+      make DESTDIR=$out PREFIX=/ all
+      '';
+
+    installPhase = ''
+      make DESTDIR=$out PREFIX=/ install
+      cp webdemo.py ../../tool/https_proxy.py $out/bin/
+      '';
+
+    # No test
+    doCheck = false;
+
+    preFixup = ''
+      patchShebangs
+      wrapPythonProgramsIn $out/bin "$out $pythonPath"
+    '';
+
+    meta = {
+      description = "A Python wrapper around tlspool";
+      homepage = https://tlspool.org;
+      license = licenses.bsd2;
+    };
+  };
+
   qrcode = buildPythonPackage rec {
     name = "qrcode-${version}";
     version = "5.1";

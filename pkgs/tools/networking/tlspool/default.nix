@@ -49,8 +49,6 @@ stdenv.mkDerivation rec {
       --replace "pkcs11_path /usr/local/lib/softhsm/libsofthsm2.so" "pkcs11_path ${softhsm}/lib/softhsm/libsofthsm2.so"
       substituteInPlace lib/Makefile \
       --replace "DESTDIR=\$(DESTDIR) PREFIX=\$(PREFIX)" "DESTDIR=\$(DESTDIR) PREFIX=\$(PREFIX) SWIG=${swig}/bin/swig"
-      substituteInPlace lib/python/Makefile \
-      --replace "python setup.py install" "pip install --target=$out/${python.sitePackages} --no-cache-dir . "
   '';
 
   installPhase = ''
@@ -62,8 +60,6 @@ stdenv.mkDerivation rec {
     cp include/tlspool/*.h $out/include/${pname}
     cp pulleyback/*.h $out/include/${pname}/pulleyback/
     cp src/*.h $out/include/${pname}
-    cp lib/python/webdemo.py $out/bin/tlspool-webdemo
-    wrapPythonProgram "$out/bin/tlspool-webdemo $pythonPath"
     '';
 
     shellHook = ''
