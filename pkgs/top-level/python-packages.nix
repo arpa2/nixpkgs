@@ -22750,7 +22750,7 @@ in modules // {
     doCheck = false;
 
     preFixup = ''
-      patchShebangs
+      patchShebangs $out/bin
       wrapPythonProgramsIn $out/bin "$out $pythonPath"
     '';
 
