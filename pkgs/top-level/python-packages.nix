@@ -22733,7 +22733,8 @@ in modules // {
 
     patchPhase = ''
         substituteInPlace Makefile \
-        --replace "python setup.py install" "pip install --target=$out/${python.sitePackages} --no-cache-dir . "
+        --replace "python setup.py install" "pip install --target=$out/${python.sitePackages} --no-cache-dir . " \
+        --replace "-I ../../include" "-I ../../include -I${src}/tlspool/include"
     '';
 
     buildPhase = ''
@@ -22748,11 +22749,6 @@ in modules // {
 
     # No test
     doCheck = false;
-
-    preFixup = ''
-      patchShebangs $out/bin
-      wrapPythonProgramsIn $out/bin "$out $pythonPath"
-    '';
 
     meta = {
       description = "A Python wrapper around tlspool";
