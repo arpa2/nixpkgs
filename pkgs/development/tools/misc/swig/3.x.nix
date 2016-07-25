@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   name = "swig-${version}";
-  version = "3.0.7";
+  version = "3.0.10";
 
   src = fetchFromGitHub {
     owner = "swig";
     repo = "swig";
     rev = "rel-${version}";
-    sha256 = "18zp9546d5xfq88nyykk5v3hh0iyp8r59i2ridbavxn3z914mhyv";
+    sha256 = "049rj883r9mf2bgabj3b03p7cnmqgl5939lmh8v5nnia24zb51jg";
   };
 
   nativeBuildInputs = [ autoconf automake libtool bison ];
