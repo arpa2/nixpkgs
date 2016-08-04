@@ -9003,7 +9003,10 @@ in
     in recurseIntoAttrs (imported.override (super: self: qt5LibsFun self // qt55Only self));
 
   qt56 =
-    let imported = import ../development/libraries/qt-5/5.6 { inherit pkgs; developerBuild = true;  };
+    let imported = import ../development/libraries/qt-5/5.6 { inherit
+    pkgs; developerBuild = true; };
+    dontStrip = true;
+
     in recurseIntoAttrs (imported.override (super: qt5LibsFun));
 
   qt5 = self.qt56;
