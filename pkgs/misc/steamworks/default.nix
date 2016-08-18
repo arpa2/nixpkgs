@@ -1,12 +1,12 @@
 # Nix recipe for ARPA2 Steamworks.
 
-{ pkgs, stdenv, fetchurl, cmake, openldap, sqlite, log4cpp, fcgi,
-  pkgconfig, flex, bison
+{ pkgs, stdenv, fetchurl, cmake, openldap, sqlite, log4cpp, fcgi, pspp
+, pkgconfig, flex, bison
 }:
 
 let
   pname = "steamworks";
-  version = "20160704";
+  version = "20160818";
 in
 
 stdenv.mkDerivation {
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   src = ./../../../../steamworks/. ;
 
   propagatedBuildInputs = [ ];
-  buildInputs = [ pkgconfig openldap sqlite cmake flex bison log4cpp ];
+  buildInputs = [ pkgconfig openldap sqlite cmake flex bison log4cpp pspp ];
 
   dontUseCmakeBuildDir = true;
   dontFixCmake = true;
@@ -22,7 +22,7 @@ stdenv.mkDerivation {
   phases = [ "unpackPhase" "buildPhase" "installPhase" ];
 
   buildPhase = ''
-    make build
+    PREFIX=$out make build
   '';
 
   installPhase = ''
