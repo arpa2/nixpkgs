@@ -6,7 +6,7 @@
 
 let
   pname = "steamworks";
-  version = "20160704";
+  version = "20160822";
 in
 
 stdenv.mkDerivation {
