@@ -6,18 +6,6 @@
   useSystemd ? true, systemd, swig
 }:
 
-#let
-#  gnutls_ = pkgs.appendToName "static" (pkgs.lib.overrideDerivation pkgs.gnutls35 (a: {
-#  configureFlagsArray = ("--enable-static"); doCheck = false; checkphase = " "; }));
-#in
-
-#let
-#  gnupg_ = pkgs.appendToName "thin" (pkgs.lib.overrideDerivation pkgs.gnupg21 (a: {
-#  gnutlsSupport = false; x11Support = false;  adnsSupport = false;
-#  usbSupport = false; openldapSupport = false; bzip2Support = false;
-#  readlineSupport = false; zlibSupport = false; gnutls = gnutls_; }));
-#in
-
 let
   pname = "tlspool";
   version = "20160706";
@@ -28,10 +16,12 @@ stdenv.mkDerivation rec {
   name = "${pname}-${version}";
   src = ./../../../../../tlspool/. ;
 
-  propagatedBuildInputs = [ python unbound softhsm openldap gnutls35 p11_kit.dev p11_kit.out gnupg ];
-  buildInputs = [ pkgconfig unzip git libtasn1 db libmemcached cyrus_sasl openssl bash quickder
-                  libkrb5 ldns libtool swig pkgs.pythonPackages.pip ]
-                ++ stdenv.lib.optional useSystemd systemd;
+  propagatedBuildInputs = [ python unbound softhsm openldap gnutls35
+                            p11_kit.dev p11_kit.out gnupg ];
+  buildInputs = [ pkgconfig unzip git libtasn1 db libmemcached cyrus_sasl
+                  openssl bash quickder libkrb5 ldns libtool swig
+		  pkgs.pythonPackages.pip ]
+                  ++ stdenv.lib.optional useSystemd systemd;
 
   phases = [ "unpackPhase" "patchPhase" "buildPhase" "installPhase" ];
 
@@ -61,11 +51,6 @@ stdenv.mkDerivation rec {
     cp pulleyback/*.h $out/include/${pname}/pulleyback/
     cp src/*.h $out/include/${pname}
     '';
-
-    shellHook = ''
-     export NIX_PATH="nixpkgs=${toString <nixpkgs>}"
-     export COMMANDDIR=$out/sbin
-  '';
 
   meta = with stdenv.lib; {
     description = "A supercharged TLS daemon that allows for easy, strong and consistent deployment";
