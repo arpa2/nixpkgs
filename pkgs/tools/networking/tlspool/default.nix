@@ -1,6 +1,6 @@
 # Nix recipe for TLS Pool.
 
-{ pkgs, stdenv, fetchurl, unzip, libtool, pkgconfig, git, p11_kit,
+{ pkgs, stdenv, fetchFromGitHub, unzip, libtool, pkgconfig, git, p11_kit,
   libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
   python, libkrb5, quickder, unbound, ldns, gnupg, gnutls35,
   useSystemd ? true, systemd, swig
@@ -18,7 +18,7 @@ stdenv.mkDerivation rec {
      owner  = "arpa2";
      repo   = "tlspool";
      rev    = "1ef20f9dc522f5ff894764fb39e578d9d28d5fb3";
-     sha256 = "35d51323aa90208fce63623530ee6131a21c083a37266320886515fb8f64774e";
+     sha256 = "17x6fsamc34wy6rpkjjhxaaysamf64zh60q489l4d0m25agw88p7";
   };
 
   propagatedBuildInputs = [ python unbound softhsm openldap gnutls35
