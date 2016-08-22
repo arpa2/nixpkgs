@@ -8,13 +8,18 @@
 
 let
   pname = "tlspool";
-  version = "20160706";
+  version = "unstable-20160822";
   gnutls_ = pkgs.gnutls35;
 in
 
 stdenv.mkDerivation rec {
   name = "${pname}-${version}";
-  src = ./../../../../../tlspool/. ;
+  src = fetchFromGitHub {
+     owner  = "arpa2";
+     repo   = "tlspool";
+     rev    = "1ef20f9dc522f5ff894764fb39e578d9d28d5fb3";
+     sha256 = "35d51323aa90208fce63623530ee6131a21c083a37266320886515fb8f64774e";
+  };
 
   propagatedBuildInputs = [ python unbound softhsm openldap gnutls35
                             p11_kit.dev p11_kit.out gnupg ];
