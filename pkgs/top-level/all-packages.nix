@@ -4107,6 +4107,8 @@ in
 
   ttmkfdir = callPackage ../tools/misc/ttmkfdir { };
 
+  tunnel6bed4 = callPackage ../tools/networking/6bed4 { };
+
   udunits = callPackage ../development/libraries/udunits { };
 
   uemacs = callPackage ../applications/editors/uemacs { };
