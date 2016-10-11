@@ -9119,6 +9119,10 @@ in
     libpcap = if stdenv.isLinux then libpcap else null;
   };
 
+  steamworks = callPackage ../misc/steamworks { };
+
+  steamworks-demo = callPackage ../misc/steamworks/demo.nix { };
+
   stxxl = callPackage ../development/libraries/stxxl { parallel = true; };
 
   sqlite = lowPrio (callPackage ../development/libraries/sqlite { });
