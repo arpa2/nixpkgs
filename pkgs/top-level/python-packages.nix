@@ -24736,6 +24736,44 @@ in modules // {
     };
   };
 
+  tlspool = buildPythonPackage rec {
+    pname = "tlspool";
+    name = "${pname}-${version}";
+    version = "20160722";
+
+    src = ./../../../tlspool/. ;
+
+    propagatedBuildInputs = with self; [ pkgs.tlspool pkgs.swig self.wrapPython ];
+
+    sourceRoot = "tlspool/lib/python";
+
+    patchPhase = ''
+        substituteInPlace Makefile \
+        --replace "python setup.py install" "pip install --target=$out/${python.sitePackages} --no-cache-dir . " \
+        --replace "-I ../../include" "-I ../../include -I${src}/tlspool/include"
+    '';
+
+    buildPhase = ''
+      mkdir -p $out/bin $out/${python.sitePackages}
+      make DESTDIR=$out PREFIX=/ all
+      '';
+
+    installPhase = ''
+      make DESTDIR=$out PREFIX=/ install
+      cp webdemo.py ../../tool/https_proxy.py $out/bin/
+      '';
+
+    # No test
+    doCheck = false;
+
+    meta = {
+      description = "A Python wrapper around tlspool";
+      homepage = https://tlspool.org;
+      license = licenses.bsd2;
+    };
+  };
+
+
   tmdb3 = buildPythonPackage rec {
     name = "tmdb3-${version}";
     version = "0.6.17";
