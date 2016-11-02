@@ -7128,6 +7128,10 @@ in
     guileBindings = config.gnutls.guile or false;
   };
 
+  gnutls-kdh = callPackage ../development/libraries/gnutls-kdh/3.5.nix {
+    guileBindings = config.gnutls.guile or false;
+  };
+
   gpac = callPackage ../applications/video/gpac { };
 
   gpgme = callPackage ../development/libraries/gpgme {
