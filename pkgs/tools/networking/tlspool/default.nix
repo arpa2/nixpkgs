@@ -1,8 +1,8 @@
 # Nix recipe for TLS Pool.
 
-{ pkgs, stdenv, fetchurl, unzip, libtool, pkgconfig, git, p11_kit,
+{ pkgs, stdenv, fetchFromGitHub, unzip, libtool, pkgconfig, git, p11_kit,
   libtasn1, db, openldap, libmemcached, cyrus_sasl, openssl, softhsm, bash,
-  python, libkrb5, quickder, unbound, ldns, gnupg, gnutls35,
+  python, libkrb5, quickder, unbound, ldns, gnupg, gnutls-kdh,
   useSystemd ? true, systemd, swig
 }:
 
@@ -20,15 +20,20 @@
 
 let
   pname = "tlspool";
-  version = "20160706";
-  gnutls_ = pkgs.gnutls35;
+  version = "20161102";
 in
 
 stdenv.mkDerivation rec {
   name = "${pname}-${version}";
-  src = ./../../../../../tlspool/. ;
+  # For working with local version replace next lines with: src = ./../../../../../tlspool/. ;
+  src = fetchFromGitHub { 
+    owner = "arpa2";
+    repo = "tlspool";
+    rev = "6ba1f98eab35ae3a6e257691d417aa00922e7405";
+    sha256 = "1zky6m0ggd0gs7k6bl8kcy8w1xgzy0g0m7j5z68gxhxsnfdw7vzv";
+  };
 
-  propagatedBuildInputs = [ python unbound softhsm openldap gnutls35 p11_kit.dev p11_kit.out gnupg ];
+  propagatedBuildInputs = [ python unbound softhsm openldap gnutls-kdh p11_kit.dev p11_kit.out gnupg ];
   buildInputs = [ pkgconfig unzip git libtasn1 db libmemcached cyrus_sasl openssl bash quickder
                   libkrb5 ldns libtool swig pkgs.pythonPackages.pip ]
                 ++ stdenv.lib.optional useSystemd systemd;
