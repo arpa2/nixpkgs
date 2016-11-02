@@ -24739,13 +24739,14 @@ in modules // {
   tlspool = buildPythonPackage rec {
     pname = "tlspool";
     name = "${pname}-${version}";
-    version = "20160722";
+    version = "20161102";
 
-    src = ./../../../tlspool/. ;
+    # src = ./../../../tlspool/. ;
+    inherit (pkgs.tlspool) src;
 
     propagatedBuildInputs = with self; [ pkgs.tlspool pkgs.swig self.wrapPython ];
 
-    sourceRoot = "tlspool/lib/python";
+    setSourceRoot = ''cd */lib/python; export sourceRoot=`pwd`'';
 
     patchPhase = ''
         substituteInPlace Makefile \
