@@ -5196,12 +5196,17 @@ in
   rust = rustStable;
   rustStable = callPackage ../development/compilers/rust {};
   rustBeta = callPackage ../development/compilers/rust/beta.nix {};
-  rustUnstable = callPackage ../development/compilers/rust/head.nix {
+  rustNightly = callPackage ../development/compilers/rust/nightly.nix {
     rustPlatform = recurseIntoAttrs (makeRustPlatform rustBeta);
   };
 
+  rustUnstable = builtins.trace "rustUnstable was renamed to rustNightly (following upstream naming), so just use 'rustNightly' instead!" rustNightly;
+
   cargo = rust.cargo;
   rustc = rust.rustc;
+  cargoNightly = rustNightly.cargo;
+  rustcNightly = rustNightly.rustc;
+
   rustPlatform = recurseIntoAttrs (makeRustPlatform rust);
 
   makeRustPlatform = rust: lib.fix (self:
