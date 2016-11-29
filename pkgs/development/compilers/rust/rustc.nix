@@ -45,6 +45,7 @@ stdenv.mkDerivation {
   __impureHostDeps = [ "/usr/lib/libedit.3.dylib" ];
 
   NIX_LDFLAGS = optionalString stdenv.isDarwin "-rpath ${llvmShared}/lib";
+  RUSTC_BOOTSTRAP=1;
 
   src = fetchgit {
     url = https://github.com/rust-lang/rust;
@@ -54,7 +55,7 @@ stdenv.mkDerivation {
 
   # We need rust to build rust. If we don't provide it, configure will try to download it.
   configureFlags = configureFlags
-                ++ [ "--enable-local-rust" "--local-rust-root=${rustPlatform.rust.rustc}" "--enable-rpath" ]
+                ++ [ "--enable-local-rust" "--local-rust-root=${rustPlatform.rust.rustc}" "--enable-rpath" "--release-channel=nightly"]
                 # ++ [ "--jemalloc-root=${jemalloc}/lib"
                 ++ [ "--default-linker=${stdenv.cc}/bin/cc" "--default-ar=${binutils.out}/bin/ar" ]
                 ++ optional (stdenv.cc.cc ? isClang) "--enable-clang"
@@ -91,7 +92,11 @@ stdenv.mkDerivation {
     rm -vr src/test/run-make/linker-output-non-utf8/
 
     # Remove test targeted at LLVM 3.9 - https://github.com/rust-lang/rust/issues/36835
-    rm -vr src/test/run-pass/issue-36023.rs
+    rm -fvr src/test/run-pass/issue-36023.rs
+
+    # Disable test getting stuck on hydra - possible fix:
+    # https://reviews.llvm.org/rL281650
+    rm -fvr src/test/run-pass/issue-36474.rs
 
     # Useful debugging parameter
     # export VERBOSE=1

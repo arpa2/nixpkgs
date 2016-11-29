@@ -19,7 +19,8 @@ let
 
       enableParallelBuilding = true;
 
-      buildInputs = [ flex bison pkgconfig systemd ];
+      buildInputs = [ flex bison pkgconfig ]
+        ++ lib.optional stdenv.isLinux systemd;
 
       configureFlags = [
         "EXTENSION_DIR=$(out)/lib/php/extensions"
@@ -301,12 +302,12 @@ let
 
 in {
   php56 = generic {
-    version = "5.6.26";
-    sha256 = "0dk2ifn50iv8jvw2jyw2pr9xqnkksxfv9qbpay84na54hf0anynl";
+    version = "5.6.28";
+    sha256 = "13sl8z5inwyzmi1d5z4g42nq3n8gjdl4876h65bbd86mmbsa6pn5";
   };
 
   php70 = generic {
-    version = "7.0.11";
-    sha256 = "1wgpkfzpiap29nxjzqjjvpgirpg61n61xbqq9f25i60lq6fp56zr";
+    version = "7.0.13";
+    sha256 = "1hc8zry3mrggfh1yxvm255xal5h6bxf0p3wdq307w48j719bp46h";
   };
 }

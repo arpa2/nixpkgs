@@ -30,6 +30,8 @@ with lib;
     (mkRenamedOptionModule [ "services" "gitlab" "stateDir" ] [ "services" "gitlab" "statePath" ])
     (mkRemovedOptionModule [ "services" "gitlab" "satelliteDir" ] "")
 
+    (mkRenamedOptionModule [ "services" "clamav" "updater" "config" ] [ "services" "clamav" "updater" "extraConfig" ])
+
     # Old Grub-related options.
     (mkRenamedOptionModule [ "boot" "initrd" "extraKernelModules" ] [ "boot" "initrd" "kernelModules" ])
     (mkRenamedOptionModule [ "boot" "extraKernelParams" ] [ "boot" "kernelParams" ])
@@ -142,6 +144,12 @@ with lib;
     # murmur
     (mkRenamedOptionModule [ "services" "murmur" "welcome" ] [ "services" "murmur" "welcometext" ])
 
+    # parsoid
+    (mkRemovedOptionModule [ "services" "parsoid" "interwikis" ] [ "services" "parsoid" "wikis" ])
+
+    # tarsnap
+    (mkRemovedOptionModule [ "services" "tarsnap" "cachedir" ] "Use services.tarsnap.archives.<name>.cachedir")
+
     # Options that are obsolete and have no replacement.
     (mkRemovedOptionModule [ "boot" "initrd" "luks" "enable" ] "")
     (mkRemovedOptionModule [ "programs" "bash" "enable" ] "")
@@ -156,7 +164,5 @@ with lib;
       "See the 16.09 release notes for more information.")
     (mkRemovedOptionModule [ "services" "phpfpm" "phpIni" ] "")
     (mkRemovedOptionModule [ "services" "dovecot2" "package" ] "")
-    (mkRemovedOptionModule [ "services" "dockerRegistry" ]
-      "docker-registry has been deprecated upstream since a long time.")
   ];
 }

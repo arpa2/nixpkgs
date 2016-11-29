@@ -1,20 +1,36 @@
-{ stdenv, fetchurl
+{ stdenv, fetchurl, makeDesktopItem
 , xorg, gtk2, atk, glib, pango, gdk_pixbuf, cairo, freetype, fontconfig
 , gnome2, dbus, nss, nspr, alsaLib, cups, expat, udev, libnotify }:
 
-stdenv.mkDerivation rec {
+let
   bits = if stdenv.system == "x86_64-linux" then "x64"
          else "ia32";
-  version = "0.4.4";
+
+  version = "0.4.5";
+
+  myIcon = fetchurl {
+    url = "https://raw.githubusercontent.com/saenzramiro/rambox/9e4444e6297dd35743b79fe23f8d451a104028d5/resources/Icon.png";
+    sha256 = "0r00l4r5mlbgn689i3rp6ks11fgs4h2flvrlggvm2qdd974d1x0b";
+  };
+
+  desktopItem = makeDesktopItem rec {
+    name = "Rambox";
+    exec = name;
+    icon = myIcon;
+    desktopName = name;
+    genericName = "Rambox messenger";
+    categories = "Network;";
+  };
+in stdenv.mkDerivation rec {
   name = "rambox-${version}";
   src = fetchurl {
     url = "https://github.com/saenzramiro/rambox/releases/download/${version}/Rambox-${version}-${bits}.tar.gz";
     sha256 = if bits == "x64" then
-      "05xwabwij7fyifrypahcplymz46k01rzrwgp5gn79hh023w259i0" else
-      "16j17rc8mld96mq1rxnwmxwfa2q5b44s40c56mwh34plqyn546l2";
+      "0z2rmfiwhb6v2hkzgrbkd4nhdvm1rssh0mbfbdmdwxq91qzp6558" else
+      "0gq0ywk1jr0apl39dnm0vwdwg1inr7fari3cmfz3fvaym7gc8fki";
   };
 
-  phases = [ "unpackPhase" "installPhase" ];
+  phases = [ "unpackPhase" "installPhase" "postFixup" ];
 
   deps = with xorg; [
    gtk2 atk glib pango gdk_pixbuf cairo freetype fontconfig dbus
@@ -32,6 +48,13 @@ stdenv.mkDerivation rec {
     mkdir -p $out/bin $out/share/rambox
     cp -r * $out/share/rambox
     ln -s $out/share/rambox/Rambox $out/bin
+
+    mkdir -p $out/share/applications
+    ln -s ${desktopItem}/share/applications/* $out/share/applications
+  '';
+
+  postFixup = ''
+    paxmark m $out/share/rambox/Rambox
   '';
 
   meta = with stdenv.lib; {

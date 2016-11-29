@@ -1,15 +1,15 @@
-{ stdenv, fetchurl, pythonPackages }:
+{ stdenv, fetchurl, python2Packages }:
 
-pythonPackages.buildPythonApplication rec {
+python2Packages.buildPythonApplication rec {
   name = "electrum-${version}";
-  version = "2.6.4";
+  version = "2.7.11";
 
   src = fetchurl {
     url = "https://download.electrum.org/${version}/Electrum-${version}.tar.gz";
-    sha256 = "0rpqpspmrmgm0bhsnlnhlwhag6zg8hnv5bcw5vkqmv86891kpd9a";
+    sha256 = "0qy2ynyw57jgi7fw3xzsyy608yk4bhsda7qfw0j26zqinv52mrsb";
   };
 
-  propagatedBuildInputs = with pythonPackages; [
+  propagatedBuildInputs = with python2Packages; [
     dns
     ecdsa
     jsonrpclib
@@ -33,14 +33,13 @@ pythonPackages.buildPythonApplication rec {
     # amodem
   ];
 
-  preInstall = ''
-    mkdir -p $out/share
-    sed -i 's@usr_share = .*@usr_share = os.getenv("out")+"/share"@' setup.py
+  preBuild = ''
+    sed -i 's,usr_share = .*,usr_share = "'$out'/share",g' setup.py
     pyrcc4 icons.qrc -o gui/qt/icons_rc.py
   '';
 
-  doCheck = true;
-  checkPhase = ''
+  doInstallCheck = true;
+  installCheckPhase = ''
     $out/bin/electrum help >/dev/null
   '';
 

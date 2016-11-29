@@ -228,6 +228,7 @@ in rec {
   tests.containers-imperative = callTest tests/containers-imperative.nix {};
   tests.containers-extra_veth = callTest tests/containers-extra_veth.nix {};
   tests.containers-physical_interfaces = callTest tests/containers-physical_interfaces.nix {};
+  tests.containers-tmpfs = callTest tests/containers-tmpfs.nix {};
   tests.docker = hydraJob (import tests/docker.nix { system = "x86_64-linux"; });
   tests.dnscrypt-proxy = callTest tests/dnscrypt-proxy.nix { system = "x86_64-linux"; };
   tests.ecryptfs = callTest tests/ecryptfs.nix {};
@@ -245,6 +246,7 @@ in rec {
   tests.gnome3-gdm = callTest tests/gnome3-gdm.nix {};
   tests.grsecurity = callTest tests/grsecurity.nix {};
   tests.hibernate = callTest tests/hibernate.nix {};
+  tests.hound = callTest tests/hound.nix {};
   tests.i3wm = callTest tests/i3wm.nix {};
   tests.installer = callSubTests tests/installer.nix {};
   tests.influxdb = callTest tests/influxdb.nix {};
@@ -274,6 +276,7 @@ in rec {
   tests.networkingProxy = callTest tests/networking-proxy.nix {};
   tests.nfs3 = callTest tests/nfs.nix { version = 3; };
   tests.nfs4 = callTest tests/nfs.nix { version = 4; };
+  tests.leaps = callTest tests/leaps.nix { };
   tests.nsd = callTest tests/nsd.nix {};
   tests.openssh = callTest tests/openssh.nix {};
   #tests.panamax = hydraJob (import tests/panamax.nix { system = "x86_64-linux"; });

@@ -61,6 +61,7 @@
   ./misc/nixpkgs.nix
   ./misc/passthru.nix
   ./misc/version.nix
+  ./programs/adb.nix
   ./programs/atop.nix
   ./programs/bash/bash.nix
   ./programs/blcr.nix
@@ -77,6 +78,7 @@
   ./programs/man.nix
   ./programs/mosh.nix
   ./programs/nano.nix
+  ./programs/oblogout.nix
   ./programs/screen.nix
   ./programs/shadow.nix
   ./programs/shell.nix
@@ -85,6 +87,7 @@
   ./programs/ssmtp.nix
   ./programs/tmux.nix
   ./programs/venus.nix
+  ./programs/vim.nix
   ./programs/wvdial.nix
   ./programs/xfs_quota.nix
   ./programs/xonsh.nix
@@ -156,6 +159,8 @@
   ./services/databases/postgresql.nix
   ./services/databases/redis.nix
   ./services/databases/riak.nix
+  ./services/databases/riak-cs.nix
+  ./services/databases/stanchion.nix
   ./services/databases/virtuoso.nix
   ./services/desktops/accountsservice.nix
   ./services/desktops/geoclue2.nix
@@ -165,6 +170,7 @@
   ./services/desktops/gnome3/gnome-keyring.nix
   ./services/desktops/gnome3/gnome-online-accounts.nix
   ./services/desktops/gnome3/gnome-online-miners.nix
+  ./services/desktops/gnome3/gnome-terminal-server.nix
   ./services/desktops/gnome3/gnome-user-share.nix
   ./services/desktops/gnome3/gvfs.nix
   ./services/desktops/gnome3/seahorse.nix
@@ -235,7 +241,9 @@
   ./services/misc/dictd.nix
   ./services/misc/dysnomia.nix
   ./services/misc/disnix.nix
+  ./services/misc/docker-registry.nix
   ./services/misc/emby.nix
+  ./services/misc/errbot.nix
   ./services/misc/etcd.nix
   ./services/misc/felix.nix
   ./services/misc/folding-at-home.nix
@@ -245,6 +253,7 @@
   ./services/misc/gitolite.nix
   ./services/misc/gpsd.nix
   ./services/misc/ihaskell.nix
+  ./services/misc/leaps.nix
   ./services/misc/mantisbt.nix
   ./services/misc/mathics.nix
   ./services/misc/matrix-synapse.nix
@@ -309,7 +318,9 @@
   ./services/monitoring/uptime.nix
   ./services/monitoring/zabbix-agent.nix
   ./services/monitoring/zabbix-server.nix
+  ./services/network-filesystems/cachefilesd.nix
   ./services/network-filesystems/drbd.nix
+  ./services/network-filesystems/ipfs.nix
   ./services/network-filesystems/netatalk.nix
   ./services/network-filesystems/nfsd.nix
   ./services/network-filesystems/openafs-client/default.nix
@@ -337,6 +348,7 @@
   ./services/networking/connman.nix
   ./services/networking/consul.nix
   ./services/networking/coturn.nix
+  ./services/networking/dante.nix
   ./services/networking/ddclient.nix
   ./services/networking/dhcpcd.nix
   ./services/networking/dhcpd.nix
@@ -452,6 +464,7 @@
   ./services/scheduling/fcron.nix
   ./services/scheduling/marathon.nix
   ./services/search/elasticsearch.nix
+  ./services/search/hound.nix
   ./services/search/kibana.nix
   ./services/search/solr.nix
   ./services/security/clamav.nix
@@ -481,11 +494,15 @@
   ./services/ttys/agetty.nix
   ./services/ttys/gpm.nix
   ./services/ttys/kmscon.nix
+  ./services/web-apps/atlassian/confluence.nix
+  ./services/web-apps/atlassian/crowd.nix
+  ./services/web-apps/atlassian/jira.nix
   ./services/web-apps/mattermost.nix
   ./services/web-apps/nixbot.nix
   ./services/web-apps/pump.io.nix
   ./services/web-apps/tt-rss.nix
   ./services/web-apps/selfoss.nix
+  ./services/web-apps/quassel-webserver.nix
   ./services/web-servers/apache-httpd/default.nix
   ./services/web-servers/caddy.nix
   ./services/web-servers/fcgiwrap.nix
