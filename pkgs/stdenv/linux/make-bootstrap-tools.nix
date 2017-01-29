@@ -6,8 +6,9 @@ rec {
 
 
   coreutilsMinimal = coreutils.override (args: {
-    # We want coreutils without ACL support.
+    # We want coreutils without ACL/attr support.
     aclSupport = false;
+    attrSupport = false;
     # Our tooling currently can't handle scripts in bin/, only ELFs and symlinks.
     singleBinary = "symlinks";
   });
@@ -169,13 +170,12 @@ rec {
   };
 
   bootstrapFiles = {
-    busybox = "${build}/on-server/busybox";
-    bootstrapTools = "${build}/on-server/bootstrap-tools.tar.xz";
+    # Make them their own store paths to test that busybox still works when the binary is named /nix/store/HASH-busybox
+    busybox = runCommand "busybox" {} "cp ${build}/on-server/busybox $out";
+    bootstrapTools = runCommand "bootstrap-tools.tar.xz" {} "cp ${build}/on-server/bootstrap-tools.tar.xz $out";
   };
 
-  bootstrapTools = (import ./default.nix {
-    inherit system bootstrapFiles;
-  }).bootstrapTools;
+  bootstrapTools = import ./bootstrap-tools { inherit system bootstrapFiles; };
 
   test = derivation {
     name = "test-bootstrap-tools";

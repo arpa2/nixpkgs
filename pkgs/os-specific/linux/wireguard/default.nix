@@ -1,18 +1,16 @@
 { stdenv, fetchurl, libmnl, kernel ? null }:
 
-# module requires Linux >= 4.1 https://www.wireguard.io/install/#kernel-requirements
-assert kernel != null -> stdenv.lib.versionAtLeast kernel.version "4.1";
-# module is incompatible with the PaX constification plugin
-assert kernel != null -> !(kernel.features.grsecurity or false);
+# module requires Linux >= 3.18 https://www.wireguard.io/install/#kernel-requirements
+assert kernel != null -> stdenv.lib.versionAtLeast kernel.version "3.18";
 
 let
-  name = "wireguard-unstable-${version}";
+  name = "wireguard-${version}";
 
-  version = "2016-10-01";
+  version = "0.0.20170115";
 
   src = fetchurl {
-    url    = "https://git.zx2c4.com/WireGuard/snapshot/WireGuard-experimental-0.0.20161001.tar.xz";
-    sha256 = "1j1s276lgp17yrlc46bgsbpwp635cvvv6b3ap49aq5h7jixvnfmc";
+    url    = "https://git.zx2c4.com/WireGuard/snapshot/WireGuard-${version}.tar.xz";
+    sha256 = "1s7zypgbwyf3mkh9any413p0awpny0dxix8d1plsrm52k539ypvy";
   };
 
   meta = with stdenv.lib; {
@@ -48,6 +46,9 @@ let
     buildInputs = [ libmnl ];
 
     makeFlags = [
+      "WITH_BASHCOMPLETION=yes"
+      "WITH_WGQUICK=yes"
+      "WITH_SYSTEMDUNITS=yes"
       "DESTDIR=$(out)"
       "PREFIX=/"
       "-C" "tools"

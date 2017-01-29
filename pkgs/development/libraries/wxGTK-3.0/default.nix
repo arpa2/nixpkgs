@@ -1,9 +1,13 @@
 { stdenv, fetchurl, pkgconfig, gtk2, libXinerama, libSM, libXxf86vm, xf86vidmodeproto
 , gstreamer, gst_plugins_base, GConf, setfile
-, withMesa ? true, mesa ? null, compat24 ? false, compat26 ? true, unicode ? true,
+, withMesa ? true, mesa ? null, compat24 ? false, compat26 ? true, unicode ? true
+, withWebKit ? false, webkitgtk2 ? null
+, AGL ? null, Carbon ? null, Cocoa ? null, Kernel ? null, QTKit ? null
 }:
 
+
 assert withMesa -> mesa != null;
+assert withWebKit -> webkitgtk2 != null;
 
 with stdenv.lib;
 
@@ -22,9 +26,12 @@ stdenv.mkDerivation {
     [ gtk2 libXinerama libSM libXxf86vm xf86vidmodeproto gstreamer
       gst_plugins_base GConf ]
     ++ optional withMesa mesa
-    ++ optional stdenv.isDarwin setfile;
+    ++ optional withWebKit webkitgtk2
+    ++ optionals stdenv.isDarwin [ setfile Carbon Cocoa Kernel QTKit ];
 
   nativeBuildInputs = [ pkgconfig ];
+
+  propagatedBuildInputs = optional stdenv.isDarwin AGL;
 
   configureFlags =
     [ "--enable-gtk2" "--disable-precomp-headers" "--enable-mediactrl"
@@ -34,7 +41,9 @@ stdenv.mkDerivation {
     ++ optional withMesa "--with-opengl"
     ++ optionals stdenv.isDarwin
       # allow building on 64-bit
-      [ "--with-cocoa" "--enable-universal-binaries" ];
+      [ "--with-cocoa" "--enable-universal-binaries" "--with-macosx-version-min=10.7" ]
+    ++ optionals withWebKit
+      ["--enable-webview" "--enable-webview-webkit"];
 
   SEARCH_LIB = optionalString withMesa "${mesa}/lib";
 
@@ -46,6 +55,9 @@ stdenv.mkDerivation {
     substituteInPlace configure --replace \
       'ac_cv_prog_SETFILE="/Developer/Tools/SetFile"' \
       'ac_cv_prog_SETFILE="${setfile}/bin/SetFile"'
+    substituteInPlace configure --replace \
+      "-framework System" \
+      -lSystem
   '';
 
   postInstall = "
@@ -60,6 +72,6 @@ stdenv.mkDerivation {
   enableParallelBuilding = true;
   
   meta = {
-    platforms = stdenv.lib.platforms.linux;
+    platforms = with stdenv.lib.platforms; darwin ++ linux;
   };
 }

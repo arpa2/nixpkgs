@@ -1,4 +1,4 @@
-{ stdenv, lib, fetchurl, copyPathsToStore
+{ stdenv, lib, fetchpatch, copyPathsToStore
 , srcs
 
 , xlibs, libX11, libxcb, libXcursor, libXext, libXrender, libXi
@@ -8,7 +8,7 @@
 , zlib, libjpeg, libpng, libtiff, sqlite, icu
 
 , coreutils, bison, flex, gdb, gperf, lndir
-, patchelf, perl, pkgconfig, python
+, patchelf, perl, pkgconfig, python2
 
 # optional dependencies
 , cups ? null
@@ -30,10 +30,10 @@ let
   # Search path for Gtk plugin
   gtkLibPath = lib.makeLibraryPath [ gtk2 gnome_vfs libgnomeui GConf ];
 
-  dontInvalidateBacking = fetchurl {
+  dontInvalidateBacking = fetchpatch {
     url = "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=0f68f8920573cdce1729a285a92ac8582df32841;hp=24c50f8dcf7fa61ac3c3d4d6295c259a104a2b8c";
     name = "qtbug-48321-dont-invalidate-backing-store.patch";
-    sha256 = "07vnndmvri73psz0nrs2hg0zw2i4b1k1igy2al6kwjbp7d5xpglr";
+    sha256 = "1wynm2hhbhpvzvsz4vpzzkl0ss5skac6934bva8brcpi5xq68h1q";
   };
 in
 
@@ -213,7 +213,7 @@ stdenv.mkDerivation {
     # FIXME: move to the main list on rebuild.
     ++ [gnome_vfs.out libgnomeui.out gtk2 GConf];
 
-  nativeBuildInputs = [ lndir patchelf perl pkgconfig python ];
+  nativeBuildInputs = [ lndir patchelf perl pkgconfig python2 ];
 
   # freetype-2.5.4 changed signedness of some struct fields
   NIX_CFLAGS_COMPILE = "-Wno-error=sign-compare";
@@ -272,7 +272,7 @@ stdenv.mkDerivation {
     '';
 
   inherit lndir;
-  setupHook = ./setup-hook.sh;
+  setupHook = ../../qtbase-setup-hook.sh;
 
   enableParallelBuilding = true;
 

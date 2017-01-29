@@ -178,6 +178,7 @@ in
                   path = [ pkgs.simp_le ];
                   preStart = ''
                     mkdir -p '${cfg.directory}'
+                    chown '${data.user}:${data.group}' '${cfg.directory}'
                     if [ ! -d '${cpath}' ]; then
                       mkdir '${cpath}'
                     fi
@@ -283,6 +284,8 @@ in
             OnCalendar = cfg.renewInterval;
             Unit = "acme-${cert}.service";
             Persistent = "yes";
+            AccuracySec = "5m";
+            RandomizedDelaySec = "1h";
           };
         })
       );

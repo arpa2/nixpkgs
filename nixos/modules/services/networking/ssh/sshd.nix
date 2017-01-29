@@ -228,8 +228,6 @@ in
 
   config = mkIf cfg.enable {
 
-    programs.ssh.setXAuthLocation = mkForce cfg.forwardX11;
-
     users.extraUsers.sshd =
       { isSystemUser = true;
         description = "SSH privilege separation user";
@@ -242,7 +240,7 @@ in
 
     systemd =
       let
-        service =
+        sshd-service =
           { description = "SSH Daemon";
 
             wantedBy = optional (!cfg.startWhenNeeded) "multi-user.target";
@@ -253,16 +251,8 @@ in
 
             environment.LD_LIBRARY_PATH = nssModulesPath;
 
-            preStart =
-              ''
-                mkdir -m 0755 -p /etc/ssh
-
-                ${flip concatMapStrings cfg.hostKeys (k: ''
-                  if ! [ -f "${k.path}" ]; then
-                      ssh-keygen -t "${k.type}" ${if k ? bits then "-b ${toString k.bits}" else ""} -f "${k.path}" -N ""
-                  fi
-                '')}
-              '';
+            wants = [ "sshd-keygen.service" ];
+            after = [ "sshd-keygen.service" ];
 
             serviceConfig =
               { ExecStart =
@@ -274,10 +264,29 @@ in
                 StandardInput = "socket";
               } else {
                 Restart = "always";
-                Type = "forking";
-                PIDFile = "/run/sshd.pid";
+                Type = "simple";
               });
           };
+
+        sshd-keygen-service =
+          { description = "SSH Host Key Generation";
+            path = [ cfgc.package ];
+            script =
+            ''
+              mkdir -m 0755 -p /etc/ssh
+              ${flip concatMapStrings cfg.hostKeys (k: ''
+                if ! [ -f "${k.path}" ]; then
+                  ssh-keygen -t "${k.type}" ${if k ? bits then "-b ${toString k.bits}" else ""} -f "${k.path}" -N ""
+                fi
+              '')}
+            '';
+
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = "yes";
+            };
+          };
+
       in
 
       if cfg.startWhenNeeded then {
@@ -289,11 +298,13 @@ in
             socketConfig.Accept = true;
           };
 
-        services."sshd@" = service;
+        services.sshd-keygen = sshd-keygen-service;
+        services."sshd@" = sshd-service;
 
       } else {
 
-        services.sshd = service;
+        services.sshd-keygen = sshd-keygen-service;
+        services.sshd = sshd-service;
 
       };
 
@@ -310,8 +321,6 @@ in
 
     services.openssh.extraConfig = mkOrder 0
       ''
-        PidFile /run/sshd.pid
-
         Protocol 2
 
         UsePAM yes

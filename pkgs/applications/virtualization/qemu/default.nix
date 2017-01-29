@@ -1,6 +1,6 @@
-{ stdenv, fetchurl, fetchpatch, python, zlib, pkgconfig, glib
-, ncurses, perl, pixman, vde2, alsaLib, texinfo, libuuid, flex
-, bison, lzo, snappy, libaio, gnutls, nettle
+{ stdenv, fetchurl, fetchpatch, python2, zlib, pkgconfig, glib
+, ncurses, perl, pixman, vde2, alsaLib, texinfo, flex
+, bison, lzo, snappy, libaio, gnutls, nettle, curl
 , makeWrapper
 , attr, libcap, libcap_ng
 , CoreServices, Cocoa, rez, setfile
@@ -11,28 +11,32 @@
 , vncSupport ? true, libjpeg, libpng
 , spiceSupport ? !stdenv.isDarwin, spice, spice_protocol, usbredir
 , x86Only ? false
+, nixosTestRunner ? false
 }:
 
 with stdenv.lib;
 let
-  version = "2.7.0";
+  version = "2.8.0";
   audio = optionalString (hasSuffix "linux" stdenv.system) "alsa,"
     + optionalString pulseSupport "pa,"
     + optionalString sdlSupport "sdl,";
 in
 
 stdenv.mkDerivation rec {
-  name = "qemu-" + stdenv.lib.optionalString x86Only "x86-only-" + version;
+  name = "qemu-"
+    + stdenv.lib.optionalString x86Only "x86-only-"
+    + stdenv.lib.optionalString nixosTestRunner "for-vm-tests-"
+    + version;
 
   src = fetchurl {
     url = "http://wiki.qemu.org/download/qemu-${version}.tar.bz2";
-    sha256 = "0lqyz01z90nvxpc3nx4djbci7hx62cwvs5zwd6phssds0sap6vij";
+    sha256 = "0qjy3rcrn89n42y5iz60kgr0rrl29hpnj8mq2yvbc1wrcizmvzfs";
   };
 
   buildInputs =
-    [ python zlib pkgconfig glib ncurses perl pixman
-      vde2 texinfo libuuid flex bison makeWrapper lzo snappy
-      gnutls nettle
+    [ python2 zlib pkgconfig glib ncurses perl pixman
+      vde2 texinfo flex bison makeWrapper lzo snappy
+      gnutls nettle curl
     ]
     ++ optionals stdenv.isDarwin [ CoreServices Cocoa rez setfile ]
     ++ optionals seccompSupport [ libseccomp ]
@@ -47,7 +51,7 @@ stdenv.mkDerivation rec {
 
   patches = [
     ./no-etc-install.patch
-  ];
+  ] ++ optional nixosTestRunner ./force-uid0-on-9p.patch;
   hardeningDisable = [ "stackprotector" ];
 
   configureFlags =

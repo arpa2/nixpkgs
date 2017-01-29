@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, kernel }:
+{ stdenv, fetchurl, fetchpatch, kernel }:
 
 let
   version = "6.30.223.271";
@@ -15,8 +15,8 @@ stdenv.mkDerivation {
   name = "broadcom-sta-${version}-${kernel.version}";
 
   src = fetchurl {
-    url = "http://www.broadcom.com/docs/linux_sta/${tarball}";
-    sha256 = hashes.${stdenv.system};
+    url = "https://docs.broadcom.com/docs-and-downloads/docs/linux_sta/${tarball}";
+    sha256 = hashes."${stdenv.system}";
   };
 
   hardeningDisable = [ "pic" ];
@@ -27,6 +27,11 @@ stdenv.mkDerivation {
     ./linux-4.7.patch
     ./null-pointer-fix.patch
     ./gcc.patch
+    (fetchpatch {
+      name = "linux-4.8.patch";
+      url = "https://aur.archlinux.org/cgit/aur.git/plain/004-linux48.patch?h=broadcom-wl-dkms";
+      sha256 = "1g1gazxx67kxyw242cli6bf62il7ikzmf0w6v14k44j6b4bihcax";
+    })
   ];
 
   makeFlags = "KBASE=${kernel.dev}/lib/modules/${kernel.modDirVersion}";

@@ -57,10 +57,6 @@ in
     tradcpp = if stdenv.isDarwin then args.tradcpp else null;
   };
 
-  intelgputools = attrs: attrs // {
-    buildInputs = attrs.buildInputs ++ [ args.cairo args.libunwind ];
-  };
-
   mkfontdir = attrs: attrs // {
     preBuild = "substituteInPlace mkfontdir.in --replace @bindir@ ${xorg.mkfontscale}/bin";
   };
@@ -217,6 +213,7 @@ in
 
   libXrender = attrs: attrs // {
     outputs = [ "out" "dev" "doc" ];
+    propagatedBuildInputs = [ xorg.renderproto ];
     preConfigure = setMalloc0ReturnsNullCrossCompiling;
   };
 
@@ -455,16 +452,14 @@ in
           "--with-default-font-path="   # there were only paths containing "${prefix}",
                                         # and there are no fonts in this package anyway
           "--with-xkb-bin-directory=${xorg.xkbcomp}/bin"
+          "--with-xkb-path=${xorg.xkeyboardconfig}/share/X11/xkb"
+          "--with-xkb-output=$out/share/X11/xkb/compiled"
           "--enable-glamor"
         ];
         postInstall = ''
-          rm -fr $out/share/X11/xkb/compiled
-          ln -s /var/tmp $out/share/X11/xkb/compiled
-          wrapProgram $out/bin/Xephyr \
-            --add-flags "-xkbdir ${xorg.xkeyboardconfig}/share/X11/xkb"
+          rm -fr $out/share/X11/xkb/compiled # otherwise X will try to write in it
           wrapProgram $out/bin/Xvfb \
-            --set XORG_DRI_DRIVER_PATH ${args.mesa}/lib/dri \
-            --add-flags "-xkbdir ${xorg.xkeyboardconfig}/share/X11/xkb"
+            --set XORG_DRI_DRIVER_PATH ${args.mesa}/lib/dri
           ( # assert() keeps runtime reference xorgserver-dev in xf86-video-intel and others
             cd "$dev"
             for f in include/xorg/*.h; do
@@ -509,7 +504,6 @@ in
         '';
         postInstall = ''
           rm -fr $out/share/X11/xkb/compiled
-          ln -s /var/tmp $out/share/X11/xkb/compiled
 
           cp -rT ${darwinOtherX}/bin $out/bin
           rm -f $out/bin/X
@@ -593,4 +587,9 @@ in
     preBuild = "sed -i 's|gcc -E|gcc -E -P|' man/Makefile";
   };
 
+  xrandr = attrs: attrs // {
+    postInstall = ''
+      rm $out/bin/xkeystone
+    '';
+  };
 }

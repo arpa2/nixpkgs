@@ -1,7 +1,7 @@
 let lib = import ../../../lib; in lib.makeOverridable (
 
 { system, name ? "stdenv", preHook ? "", initialPath, cc, shell
-, allowedRequisites ? null, extraAttrs ? {}, overrides ? (pkgs: {}), config
+, allowedRequisites ? null, extraAttrs ? {}, overrides ? (self: super: {}), config
 
 , # The `fetchurl' to use for downloading curl and its dependencies
   # (see all-packages.nix).
@@ -44,7 +44,7 @@ let
       throw "whitelistedLicenses and blacklistedLicenses are not mutually exclusive.";
 
   hasLicense = attrs:
-    builtins.hasAttr "meta" attrs && builtins.hasAttr "license" attrs.meta;
+    attrs ? meta.license;
 
   hasWhitelistedLicense = assert areLicenseListsValid; attrs:
     hasLicense attrs && builtins.elem attrs.meta.license whitelist;
@@ -115,7 +115,19 @@ let
     , sandboxProfile ? ""
     , propagatedSandboxProfile ? ""
     , ... } @ attrs:
-    let
+    let # Rename argumemnts to avoid cycles
+      buildInputs__ = buildInputs;
+      nativeBuildInputs__ = nativeBuildInputs;
+      propagatedBuildInputs__ = propagatedBuildInputs;
+      propagatedNativeBuildInputs__ = propagatedNativeBuildInputs;
+    in let
+      getNativeDrv = drv: drv.nativeDrv or drv;
+      getCrossDrv = drv: drv.crossDrv or drv;
+      nativeBuildInputs = map getNativeDrv nativeBuildInputs__;
+      buildInputs = map getCrossDrv buildInputs__;
+      propagatedBuildInputs = map getCrossDrv propagatedBuildInputs__;
+      propagatedNativeBuildInputs = map getNativeDrv propagatedNativeBuildInputs__;
+    in let
       pos' =
         if pos != null then
           pos
@@ -128,8 +140,7 @@ let
       throwEvalHelp = { reason, errormsg }:
         # uppercase the first character of string s
         let up = s: with lib;
-          let cs = lib.stringToCharacters s;
-          in concatStrings (singleton (toUpper (head cs)) ++ tail cs);
+          (toUpper (substring 0 1 s)) + (substring 1 (stringLength s) s);
         in
         assert builtins.elem reason ["unfree" "broken" "blacklisted"];
 
@@ -140,7 +151,7 @@ let
             { nixpkgs.config.allow${up reason} = true; }
           in configuration.nix to override this.
 
-          b) For `nix-env`, `nix-build` or any other Nix command you can add
+          b) For `nix-env`, `nix-build`, `nix-shell` or any other Nix command you can add
             { allow${up reason} = true; }
           to ~/.nixpkgs/config.nix.
         ''));
@@ -235,6 +246,7 @@ let
           outputs = outputs';
         } else { })))) (
       {
+        overrideAttrs = f: mkDerivation (attrs // (f attrs));
         # The meta attribute is passed in the resulting attribute set,
         # but it's not part of the actual derivation, i.e., it's not
         # passed to the builder and is not a dependency.  But since we
@@ -299,6 +311,7 @@ let
              || system == "armv5tel-linux"
              || system == "armv6l-linux"
              || system == "armv7l-linux"
+             || system == "aarch64-linux"
              || system == "mips64el-linux";
       isGNU = system == "i686-gnu"; # GNU/Hurd
       isGlibc = isGNU # useful for `stdenvNative'
@@ -336,6 +349,7 @@ let
       isArm = system == "armv5tel-linux"
            || system == "armv6l-linux"
            || system == "armv7l-linux";
+      isAarch64 = system == "aarch64-linux";
       isBigEndian = system == "powerpc-linux";
 
       # Whether we should run paxctl to pax-mark binaries.

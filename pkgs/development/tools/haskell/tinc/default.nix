@@ -7,12 +7,12 @@
 }:
 mkDerivation {
   pname = "tinc";
-  version = "20160924";
+  version = "20161119";
   src = fetchFromGitHub {
     owner = "sol";
     repo = "tinc";
-    rev = "f5ba99264930a2af2f24770a23af2613acdac631";
-    sha256 = "19mvswpjak9dxpd4w86fz1wv0zkn6ippc37gdkhyg4xcj9jn21a9";
+    rev = "8e31ed920ad1660b3bc458b4f6b281bacaf4bd14";
+    sha256 = "0y9pvr20p9z4dddbfxgy9hl3ny7pxixxjg8ij7g8l14br6mcak30";
   };
   isLibrary = false;
   isExecutable = true;

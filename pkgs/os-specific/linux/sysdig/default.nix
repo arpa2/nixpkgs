@@ -1,29 +1,31 @@
-{stdenv, fetchurl, fetchFromGitHub, cmake, luajit, kernel, zlib, ncurses, perl, jsoncpp, libb64, openssl, curl}:
+{stdenv, fetchurl, fetchFromGitHub, cmake, luajit, kernel, zlib, ncurses, perl, jsoncpp, libb64, openssl, curl, jq, gcc, fetchpatch}:
 let
   inherit (stdenv.lib) optional optionalString;
   baseName = "sysdig";
-  version = "0.10.0";
-  # sysdig-0.11.0 depends on some headers from jq which are not
-  # installed by default.
-  # Relevant sysdig issue: https://github.com/draios/sysdig/issues/626
-  jq-prefix = fetchurl {
-    url="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-1.5.tar.gz";
-    sha256="0g29kyz4ykasdcrb0zmbrp2jqs9kv1wz9swx849i2d1ncknbzln4";
-  };
+  version = "0.13.0";
 in
 stdenv.mkDerivation {
   name = "${baseName}-${version}";
 
   src = fetchurl {
     url = "https://github.com/draios/sysdig/archive/${version}.tar.gz";
-    sha256 = "0hs0r9z9j7padqdcj69bwx52iw6gvdl0w322qwivpv12j3prcpsj";
+    sha256 = "0ghxj473v471nnry8h9accxpwwjp8nbzkgw8dniqld0ixx678pia";
   };
 
   buildInputs = [
-    cmake zlib luajit ncurses perl jsoncpp libb64 openssl curl
+    cmake zlib luajit ncurses perl jsoncpp libb64 openssl curl jq gcc
   ];
 
   hardeningDisable = [ "pic" ];
+
+  patches = [
+    # patch for linux >= 4.9.1
+    # is included in the next release
+    (fetchpatch {
+      url = "https://github.com/draios/sysdig/commit/68823ffd3a76f88ad34c3d0d9f6fdf1ada0eae43.patch";
+      sha256 = "02vgyd70mwrk6mcdkacaahk49irm6vxzqb7dfickk6k32lh3m44k";
+    })
+  ];
 
   postPatch = ''
     sed '1i#include <cmath>' -i userspace/libsinsp/{cursesspectro,filterchecks}.cpp
@@ -31,7 +33,6 @@ stdenv.mkDerivation {
 
   cmakeFlags = [
     "-DUSE_BUNDLED_DEPS=OFF"
-    "-DUSE_BUNDLED_JQ=ON"
     "-DSYSDIG_VERSION=${version}"
   ] ++ optional (kernel == null) "-DBUILD_DRIVER=OFF";
 
@@ -41,12 +42,23 @@ stdenv.mkDerivation {
     export KERNELDIR="${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
   '';
 
-  preBuild = ''
-    mkdir -p jq-prefix/src
-    cp ${jq-prefix} jq-prefix/src/jq-1.5.tar.gz
-  '';
+  libPath = stdenv.lib.makeLibraryPath [
+    zlib
+    luajit
+    ncurses
+    jsoncpp
+    curl
+    jq
+    openssl
+    libb64
+    gcc
+    stdenv.cc.cc
+  ];
 
-  postInstall = optionalString (kernel != null) ''
+  postInstall = ''
+    patchelf --set-rpath "$libPath" "$out/bin/sysdig"
+    patchelf --set-rpath "$libPath" "$out/bin/csysdig"
+  '' + optionalString (kernel != null) ''
     make install_driver
     kernel_dev=${kernel.dev}
     kernel_dev=''${kernel_dev#/nix/store/}

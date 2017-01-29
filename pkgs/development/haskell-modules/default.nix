@@ -1,18 +1,10 @@
-{ pkgs, stdenv, ghc
+{ pkgs, stdenv, ghc, all-cabal-hashes
 , compilerConfig ? (self: super: {})
 , packageSetConfig ? (self: super: {})
 , overrides ? (self: super: {})
 }:
 
 let
-
-  allCabalFiles = stdenv.mkDerivation {
-    name = "all-cabal-hashes-0";
-    buildCommand = ''
-      mkdir -p $out
-      tar -C $out --strip-components=1 -x -f ${builtins.fetchurl "https://github.com/commercialhaskell/all-cabal-hashes/archive/hackage.tar.gz"}
-    '';
-  };
 
   inherit (stdenv.lib) fix' extends;
 
@@ -22,7 +14,10 @@ let
       mkDerivation = pkgs.callPackage ./generic-builder.nix {
         inherit stdenv;
         inherit (pkgs) fetchurl pkgconfig glibcLocales coreutils gnugrep gnused;
-        inherit (self) ghc jailbreak-cabal;
+        jailbreak-cabal = if (self.ghc.cross or null) != null
+          then self.ghc.bootPkgs.jailbreak-cabal
+          else self.jailbreak-cabal;
+        inherit (self) ghc;
         hscolour = overrideCabal self.hscolour (drv: {
           isLibrary = false;
           doHaddock = false;
@@ -69,8 +64,8 @@ let
         installPhase = ''
           export HOME="$TMP"
           mkdir $out
-          hash=$(sed -e 's/.*"SHA256":"//' -e 's/".*$//' ${allCabalFiles}/${name}/${version}/${name}.json)
-          cabal2nix --compiler=${self.ghc.name} --system=${stdenv.system} --sha256=$hash ${allCabalFiles}/${name}/${version}/${name}.cabal >$out/default.nix
+          hash=$(sed -e 's/.*"SHA256":"//' -e 's/".*$//' ${all-cabal-hashes}/${name}/${version}/${name}.json)
+          cabal2nix --compiler=${self.ghc.name} --system=${stdenv.system} --sha256=$hash ${all-cabal-hashes}/${name}/${version}/${name}.cabal >$out/default.nix
         '';
       };
 
@@ -88,7 +83,6 @@ let
             packages = selectFrom self;
             hoogle = callPackage ./hoogle.nix {
               inherit packages;
-              hoogle = self.hoogle_5_0_4;
             };
           in withPackages (packages ++ [ hoogle ]);
 

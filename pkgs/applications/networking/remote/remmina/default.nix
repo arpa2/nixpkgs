@@ -1,14 +1,17 @@
-{ stdenv, fetchFromGitHub, cmake, pkgconfig, makeWrapper
+{ stdenv, fetchFromGitHub, cmake, pkgconfig, wrapGAppsHook
 , glib, gtk3, gettext, libxkbfile, libgnome_keyring, libX11
 , freerdp, libssh, libgcrypt, gnutls, makeDesktopItem
 , pcre, webkitgtk, libdbusmenu-gtk3, libappindicator-gtk3
 , libvncserver, libpthreadstubs, libXdmcp, libxkbcommon
 , libsecret, spice_protocol, spice_gtk, epoxy, at_spi2_core
-, openssl }:
+, openssl, gsettings_desktop_schemas
+# The themes here are soft dependencies; only icons are missing without them.
+, hicolor_icon_theme, adwaita-icon-theme
+}:
 
 let
   version = "1.2.0-rcgit.15";
-  
+
   desktopItem = makeDesktopItem {
     name = "remmina";
     desktopName = "Remmina";
@@ -45,20 +48,25 @@ stdenv.mkDerivation {
     sha256 = "07lj6a7x9cqcff18pwfkx8c8iml015zp6sq29dfcxpfg4ai578h0";
   };
 
-  buildInputs = [ cmake pkgconfig makeWrapper
+  buildInputs = [ cmake pkgconfig wrapGAppsHook gsettings_desktop_schemas
                   glib gtk3 gettext libxkbfile libgnome_keyring libX11
                   freerdp_git libssh libgcrypt gnutls
                   pcre webkitgtk libdbusmenu-gtk3 libappindicator-gtk3
                   libvncserver libpthreadstubs libXdmcp libxkbcommon
                   libsecret spice_protocol spice_gtk epoxy at_spi2_core
-                  openssl ];
+                  openssl hicolor_icon_theme adwaita-icon-theme ];
 
   cmakeFlags = "-DWITH_VTE=OFF -DWITH_TELEPATHY=OFF -DWITH_AVAHI=OFF -DWINPR_INCLUDE_DIR=${freerdp_git}/include/winpr2";
+
+  preFixup = ''
+    gappsWrapperArgs+=(
+      --prefix LD_LIBRARY_PATH : "${libX11.out}/lib"
+    )
+  '';
 
   postInstall = ''
     mkdir -pv $out/share/applications
     cp ${desktopItem}/share/applications/* $out/share/applications
-    wrapProgram $out/bin/remmina --prefix LD_LIBRARY_PATH : "${libX11.out}/lib"
   '';
 
   meta = with stdenv.lib; {

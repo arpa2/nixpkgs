@@ -12,15 +12,17 @@ assert (!libsOnly) -> kernel != null;
 
 let
 
-  versionNumber = "367.35";
+  versionNumber = "375.26";
 
   # Policy: use the highest stable version as the default (on our master).
   inherit (stdenv.lib) makeLibraryPath;
 
+  nameSuffix = optionalString (!libsOnly) "-${kernel.version}";
+
 in
 
 stdenv.mkDerivation {
-  name = "nvidia-x11-${versionNumber}${optionalString (!libsOnly) "-${kernel.version}"}";
+  name = "nvidia-x11-${versionNumber}${nameSuffix}";
 
   builder = ./builder.sh;
 
@@ -28,12 +30,12 @@ stdenv.mkDerivation {
     if stdenv.system == "i686-linux" then
       fetchurl {
         url = "http://download.nvidia.com/XFree86/Linux-x86/${versionNumber}/NVIDIA-Linux-x86-${versionNumber}.run";
-        sha256 = "05g36bxcfk21ab8b0ay3zy21k5nd71468p9y1nbflx7ghpx25jrq";
+        sha256 = "0yv19rkz2wzzj0fygfjb1mh21iy769kff3yg2kzk8bsiwnmcyybw";
       }
     else if stdenv.system == "x86_64-linux" then
       fetchurl {
-        url = "http://download.nvidia.com/XFree86/Linux-x86_64/${versionNumber}/NVIDIA-Linux-x86_64-${versionNumber}-no-compat32.run";
-        sha256 = "0m4k8f0212l63h22wk6hgi8fbfsgxqih5mizsw4ixqqmjd75av4a";
+        url = "http://download.nvidia.com/XFree86/Linux-x86_64/${versionNumber}/NVIDIA-Linux-x86_64-${versionNumber}.run";
+        sha256 = "1kqy9ayja3g5znj2hzx8pklz8qi0b0l9da7c3ldg3hlxf31v4hjg";
       }
     else throw "nvidia-x11 does not support platform ${stdenv.system}";
 
@@ -55,7 +57,7 @@ stdenv.mkDerivation {
     [ gtk2 atk pango glib gdk_pixbuf cairo ] );
   programPath = makeLibraryPath [ xorg.libXv ];
 
-  patches = if (!libsOnly) && (versionAtLeast kernel.dev.version "4.7") then [ ./365.35-kernel-4.7.patch ] else [];
+
 
   buildInputs = [ perl nukeReferences ];
 

@@ -9,9 +9,7 @@ let
   env = bundlerEnv {
     name = "gitlab";
     inherit ruby;
-    gemfile = ./Gemfile;
-    lockfile = ./Gemfile.lock;
-    gemset = ./gemset.nix;
+    gemdir = ./.;
     meta = with lib; {
       homepage = http://www.gitlab.com/;
       platforms = platforms.linux;
@@ -24,7 +22,7 @@ in
 
 stdenv.mkDerivation rec {
   name = "gitlab-${version}";
-  version = "8.12.1";
+  version = "8.16.1";
 
   buildInputs = [ env ruby bundler tzdata git nodejs procps ];
 
@@ -32,7 +30,7 @@ stdenv.mkDerivation rec {
     owner = "gitlabhq";
     repo = "gitlabhq";
     rev = "v${version}";
-    sha256 = "1aq91q89g3xb28v833748y9ywy9d6551zn3hb22cqphjijkn3wgl";
+    sha256 = "0c6cf8p1xx21xxmlpldhxs0i01myd4ddpjl7vfv932qmw9bw4in7";
   };
 
   patches = [
