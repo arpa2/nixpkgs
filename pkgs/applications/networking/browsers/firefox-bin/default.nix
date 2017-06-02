@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, config, makeWrapper
+{ stdenv, fetchurl, config, wrapGAppsHook
 , alsaLib
 , atk
 , cairo
@@ -12,7 +12,7 @@
 , gdk_pixbuf
 , glib
 , glibc
-, gst_plugins_base
+, gst-plugins-base
 , gstreamer
 , gtk2
 , gtk3
@@ -38,6 +38,12 @@
 , libpulseaudio
 , systemd
 , generated ? import ./sources.nix
+, writeScript
+, xidel
+, coreutils
+, gnused
+, gnugrep
+, gnupg
 }:
 
 assert stdenv.isLinux;
@@ -62,18 +68,21 @@ let
 
   source = stdenv.lib.findFirst (sourceMatches systemLocale) defaultSource sources;
 
+  name = "firefox-bin-unwrapped-${version}";
+
 in
 
 stdenv.mkDerivation {
-  name = "firefox-bin-unwrapped-${version}";
+  inherit name;
 
   src = fetchurl { inherit (source) url sha512; };
 
-  phases = "unpackPhase installPhase";
+  phases = [ "unpackPhase" "installPhase" "fixupPhase" ];
 
   libPath = stdenv.lib.makeLibraryPath
     [ stdenv.cc.cc
       alsaLib
+      alsaLib.dev
       atk
       cairo
       curl
@@ -86,7 +95,7 @@ stdenv.mkDerivation {
       gdk_pixbuf
       glib
       glibc
-      gst_plugins_base
+      gst-plugins-base
       gstreamer
       gtk2
       gtk3
@@ -115,11 +124,12 @@ stdenv.mkDerivation {
       stdenv.cc.cc
     ];
 
-  buildInputs = [ makeWrapper gtk3 defaultIconTheme ];
+  buildInputs = [ wrapGAppsHook gtk3 defaultIconTheme ];
 
   # "strip" after "patchelf" may break binaries.
   # See: https://github.com/NixOS/patchelf/issues/10
-  dontStrip = 1;
+  dontStrip = true;
+  dontPatchELF = true;
 
   installPhase =
     ''
@@ -146,26 +156,13 @@ stdenv.mkDerivation {
       # wrapFirefox expects "$out/lib" instead of "$out/usr/lib"
       ln -s "$out/usr/lib" "$out/lib"
 
-      # Create a desktop item.
-      mkdir -p $out/share/applications
-      cat > $out/share/applications/firefox.desktop <<EOF
-      [Desktop Entry]
-      Type=Application
-      Exec=$out/bin/firefox
-      Icon=$out/usr/lib/firefox-bin-${version}/browser/icons/mozicon128.png
-      Name=Firefox
-      GenericName=Web Browser
-      Categories=Application;Network;
-      EOF
-
-      wrapProgram "$out/bin/firefox" \
-        --argv0 "$out/bin/.firefox-wrapped" \
-        --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH:" \
-        --suffix XDG_DATA_DIRS : "$XDG_ICON_DIRS"
+      gappsWrapperArgs+=(--argv0 "$out/bin/.firefox-wrapped")
     '';
 
   passthru.ffmpegSupport = true;
-
+  passthru.updateScript = import ./update.nix {
+    inherit name writeScript xidel coreutils gnused gnugrep gnupg curl;
+  };
   meta = with stdenv.lib; {
     description = "Mozilla Firefox, free web browser (binary package)";
     homepage = http://www.mozilla.org/firefox/;

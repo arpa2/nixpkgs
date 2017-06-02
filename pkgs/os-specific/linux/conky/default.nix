@@ -62,13 +62,13 @@ with stdenv.lib;
 
 stdenv.mkDerivation rec {
   name = "conky-${version}";
-  version = "1.10.3";
+  version = "1.10.6";
 
   src = fetchFromGitHub {
     owner = "brndnmtthws";
     repo = "conky";
     rev = "v${version}";
-    sha256 = "0sa2jl159jk5p2hr37adwq84m0ynva7v87qrwj1xv0kw8l4qzhjs";
+    sha256 = "15j8h251v9jpdg6h6wn1vb45pkk806pf9s5n3rdrps9r185w8hn8";
   };
 
   postPatch = ''

@@ -13,12 +13,16 @@
 }:
 
 stdenv.mkDerivation rec {
-  name = "nsd-4.1.12";
+  name = "nsd-4.1.16";
 
   src = fetchurl {
     url = "http://www.nlnetlabs.nl/downloads/nsd/${name}.tar.gz";
-    sha256 = "fd1979dff1fba55310fd4f439dc9f3f4701d435c0ec4fb9af533e12c7f27d5de";
+    sha256 = "1cmaddfjb7yr87gjd5yv4d0qng0j97sy5rw5m3zxsp6c4fnng0vz";
   };
+
+  prePatch = ''
+    substituteInPlace nsd-control-setup.sh.in --replace openssl ${openssl}/bin/openssl
+  '';
 
   buildInputs = [ libevent openssl ];
 

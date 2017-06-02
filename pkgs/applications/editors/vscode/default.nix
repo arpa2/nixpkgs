@@ -1,30 +1,38 @@
-{ stdenv, lib, callPackage, fetchurl, unzip, atomEnv, makeDesktopItem }:
+{ stdenv, lib, callPackage, fetchurl, unzip, atomEnv, makeDesktopItem,
+  makeWrapper, libXScrnSaver, libxkbfile }:
 
 let
-  version = "1.5.1";
-  rev = "07d663dc1bd848161edf4cd4ce30cce410d3d877";
+  version = "1.12.1";
+  channel = "stable";
 
-  sha256 = if stdenv.system == "i686-linux"    then "1a2854snjdmfhzx6qwib4iw3qjhlmlf09dlsbbvh24zbrjphnd85"
-      else if stdenv.system == "x86_64-linux"  then "0gg2ad7sp02ffv7la61hh9h4vfw8qkfladbhwlh5y4axbbrx17r7"
-      else if stdenv.system == "x86_64-darwin" then "18q4ldnmm619vv8yx6rznpznpcc19zjczmcidr34552i5qfg5xsz"
-      else throw "Unsupported system: ${stdenv.system}";
+  plat = {
+    "i686-linux" = "linux-ia32";
+    "x86_64-linux" = "linux-x64";
+    "x86_64-darwin" = "darwin";
+  }.${stdenv.system};
 
-  urlBase = "https://az764295.vo.msecnd.net/stable/${rev}/";
+  sha256 = {
+    "i686-linux" = "0i4zqxbq7bm2afzyny3a53sq1fghlz5an1z8fkqh5i3029s635h9";
+    "x86_64-linux" = "0kwmfiyb70if4svamnivbc9w65c14j3lrn5vysqkc4b8hlk4r75i";
+    "x86_64-darwin" = "1dgs4k4m885qzammhj0x9k6pd8rayxn61iq3fiazp0w8v5bhl4l5";
+  }.${stdenv.system};
 
-  urlStr = if stdenv.system == "i686-linux" then
-        urlBase + "code-stable-code_${version}-1473369468_i386.tar.gz"
-      else if stdenv.system == "x86_64-linux" then
-        urlBase + "code-stable-code_${version}-1473370243_amd64.tar.gz"
-      else if stdenv.system == "x86_64-darwin" then
-        urlBase + "VSCode-darwin-stable.zip"
-      else throw "Unsupported system: ${stdenv.system}";
+  archive_fmt = if stdenv.system == "x86_64-darwin" then "zip" else "tar.gz";
+
+  rpath = lib.concatStringsSep ":" [
+    atomEnv.libPath
+    "${lib.makeLibraryPath [libXScrnSaver]}/libXss.so.1"
+    "${lib.makeLibraryPath [libxkbfile]}/libxkbfile.so.1"
+    "$out/lib/vscode"
+  ];
+
 in
   stdenv.mkDerivation rec {
     name = "vscode-${version}";
-    inherit version;
 
     src = fetchurl {
-      url = urlStr;
+      name = "VSCode_${version}_${plat}.${archive_fmt}";
+      url = "https://vscode-update.azurewebsites.net/${version}/${plat}/${channel}";
       inherit sha256;
     };
 
@@ -32,41 +40,51 @@ in
       name = "code";
       exec = "code";
       icon = "code";
-      comment = "Visual Studio Code is a code editor redefined and optimized for building and debugging modern web and cloud applications";
+      comment = "Code editor redefined and optimized for building and debugging modern web and cloud applications";
       desktopName = "Visual Studio Code";
       genericName = "Text Editor";
       categories = "GNOME;GTK;Utility;TextEditor;Development;";
     };
 
     buildInputs = if stdenv.system == "x86_64-darwin"
-      then [ unzip ]
-      else [ ];
+      then [ unzip makeWrapper libXScrnSaver ]
+      else [ makeWrapper libXScrnSaver libxkbfile ];
 
-    installPhase = ''
-      mkdir -p $out/lib/vscode $out/bin
-      cp -r ./* $out/lib/vscode
-      ln -s $out/lib/vscode/code $out/bin
+    installPhase =
+      if stdenv.system == "x86_64-darwin" then ''
+        mkdir -p $out/lib/vscode $out/bin
+        cp -r ./* $out/lib/vscode
+        ln -s $out/lib/vscode/Contents/Resources/app/bin/code $out/bin
+      '' else ''
+        mkdir -p $out/lib/vscode $out/bin
+        cp -r ./* $out/lib/vscode
+        ln -s $out/lib/vscode/bin/code $out/bin
 
-      mkdir -p $out/share/applications
-      cp $desktopItem/share/applications/* $out/share/applications
+        mkdir -p $out/share/applications
+        cp $desktopItem/share/applications/* $out/share/applications
 
-      mkdir -p $out/share/pixmaps
-      cp $out/lib/vscode/resources/app/resources/linux/code.png $out/share/pixmaps/code.png
-    '';
+        mkdir -p $out/share/pixmaps
+        cp $out/lib/vscode/resources/app/resources/linux/code.png $out/share/pixmaps/code.png
+      '';
 
     postFixup = lib.optionalString (stdenv.system == "i686-linux" || stdenv.system == "x86_64-linux") ''
       patchelf \
         --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" \
-        --set-rpath "${atomEnv.libPath}:$out/lib/vscode" \
+        --set-rpath "${rpath}" \
         $out/lib/vscode/code
     '';
 
     meta = with stdenv.lib; {
-      description = "Visual Studio Code is an open source source code editor developed by Microsoft for Windows, Linux and OS X.";
+      description = ''
+        Open source source code editor developed by Microsoft for Windows,
+        Linux and OS X
+      '';
       longDescription = ''
-        Visual Studio Code is an open source source code editor developed by Microsoft for Windows, Linux and OS X.
-        It includes support for debugging, embedded Git control, syntax highlighting, intelligent code completion, snippets, and code refactoring.
-        It is also customizable, so users can change the editor's theme, keyboard shortcuts, and preferences.
+        Open source source code editor developed by Microsoft for Windows,
+        Linux and OS X. It includes support for debugging, embedded Git
+        control, syntax highlighting, intelligent code completion, snippets,
+        and code refactoring. It is also customizable, so users can change the
+        editor's theme, keyboard shortcuts, and preferences
       '';
       homepage = http://code.visualstudio.com/;
       downloadPage = https://code.visualstudio.com/Updates;

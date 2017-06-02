@@ -1,17 +1,17 @@
 { stdenv, fetchurl, coreutils, pam, groff
-, sendmailPath ? "/var/setuid-wrappers/sendmail"
+, sendmailPath ? "/run/wrappers/bin/sendmail"
 , withInsults ? false
 }:
 
 stdenv.mkDerivation rec {
-  name = "sudo-1.8.18";
+  name = "sudo-1.8.20";
 
   src = fetchurl {
     urls =
       [ "ftp://ftp.sudo.ws/pub/sudo/${name}.tar.gz"
         "ftp://ftp.sudo.ws/pub/sudo/OLD/${name}.tar.gz"
       ];
-    sha256 = "04xywg2f9x2kfw81abdf8gsraldaz5v0w0x2zi8aqlgsjygfj6c5";
+    sha256 = "1q70f2wqbpgq828xmfzidbhyll5p08qbj7f3p2sw2v4whpdbi5wy";
   };
 
   configureFlags = [

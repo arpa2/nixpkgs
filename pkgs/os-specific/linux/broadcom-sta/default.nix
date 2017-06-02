@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, kernel }:
+{ stdenv, fetchurl, fetchpatch, kernel }:
 
 let
   version = "6.30.223.271";
@@ -15,8 +15,8 @@ stdenv.mkDerivation {
   name = "broadcom-sta-${version}-${kernel.version}";
 
   src = fetchurl {
-    url = "http://www.broadcom.com/docs/linux_sta/${tarball}";
-    sha256 = hashes.${stdenv.system};
+    url = "https://docs.broadcom.com/docs-and-downloads/docs/linux_sta/${tarball}";
+    sha256 = hashes."${stdenv.system}";
   };
 
   hardeningDisable = [ "pic" ];
@@ -25,6 +25,8 @@ stdenv.mkDerivation {
     ./i686-build-failure.patch
     ./license.patch
     ./linux-4.7.patch
+    # source: https://git.archlinux.org/svntogit/community.git/tree/trunk/004-linux48.patch?h=packages/broadcom-wl-dkms
+    ./linux-4.8.patch
     ./null-pointer-fix.patch
     ./gcc.patch
   ];

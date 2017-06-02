@@ -9,10 +9,13 @@ let
   else
     throw "Unsupported architecture";
 
+  version = (builtins.parseDrvName edk2.name).version;
 in
 
 stdenv.mkDerivation (edk2.setup "OvmfPkg/OvmfPkg${targetArch}.dsc" {
-  name = "OVMF-2014-12-10";
+  name = "OVMF-${version}";
+
+  outputs = [ "out" "fd" ];
 
   # TODO: properly include openssl for secureBoot
   buildInputs = [nasm iasl] ++ stdenv.lib.optionals (secureBoot == true) [ openssl ];
@@ -46,6 +49,13 @@ stdenv.mkDerivation (edk2.setup "OvmfPkg/OvmfPkg${targetArch}.dsc" {
     '' else ''
       build -D CSM_ENABLE -D FD_SIZE_2MB ${if secureBoot then "-DSECURE_BOOT_ENABLE=TRUE" else ""}
     '';
+
+  postFixup = ''
+    mkdir -p $fd/FV
+    mv $out/FV/OVMF{,_CODE,_VARS}.fd $fd/FV
+  '';
+
+  dontPatchELF = true;
 
   meta = {
     description = "Sample UEFI firmware for QEMU and KVM";

@@ -1,3 +1,8 @@
+/* Library of low-level helper functions for nix expressions.
+ *
+ * Please implement (mostly) exhaustive unit tests
+ * for new functions in `./tests.nix'.
+ */
 let
 
   # trivial, often used functions
@@ -22,29 +27,34 @@ let
 
   # constants
   licenses = import ./licenses.nix;
-  platforms = import ./platforms.nix;
-  systems = import ./systems.nix;
+  systems = import ./systems;
 
   # misc
   debug = import ./debug.nix;
+  generators = import ./generators.nix;
   misc = import ./deprecated.nix;
 
   # domain-specific
   sandbox = import ./sandbox.nix;
   fetchers = import ./fetchers.nix;
 
+  # Eval-time filesystem handling
+  filesystem = import ./filesystem.nix;
+
 in
   { inherit trivial
             attrsets lists strings stringsWithDeps
             customisation maintainers meta sources
             modules options types
-            licenses platforms systems
-            debug misc
-            sandbox fetchers;
+            licenses systems
+            debug generators misc
+            sandbox fetchers filesystem;
+
+    # back-compat aliases
+    platforms = systems.doubles;
   }
   # !!! don't include everything at top-level; perhaps only the most
   # commonly used functions.
   // trivial // lists // strings // stringsWithDeps // attrsets // sources
   // options // types // meta // debug // misc // modules
-  // systems
   // customisation

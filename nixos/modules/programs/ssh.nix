@@ -20,11 +20,11 @@ let
 
   knownHosts = map (h: getAttr h cfg.knownHosts) (attrNames cfg.knownHosts);
 
-  knownHostsText = flip (concatMapStringsSep "\n") knownHosts
+  knownHostsText = (flip (concatMapStringsSep "\n") knownHosts
     (h: assert h.hostNames != [];
       concatStringsSep "," h.hostNames + " "
       + (if h.publicKey != null then h.publicKey else readFile h.publicKeyFile)
-    );
+    )) + "\n";
 
 in
 {
@@ -165,7 +165,7 @@ in
   config = {
 
     programs.ssh.setXAuthLocation =
-      mkDefault (config.services.xserver.enable || config.programs.ssh.forwardX11);
+      mkDefault (config.services.xserver.enable || config.programs.ssh.forwardX11 || config.services.openssh.forwardX11);
 
     assertions =
       [ { assertion = cfg.forwardX11 -> cfg.setXAuthLocation;

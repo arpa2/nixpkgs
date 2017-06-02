@@ -1,20 +1,34 @@
-{ lib, stdenv, fetchurl, perl, curl, bzip2, sqlite, openssl ? null, xz
-, pkgconfig, boehmgc, perlPackages, libsodium
+{ lib, stdenv, fetchurl, fetchFromGitHub, perl, curl, bzip2, sqlite, openssl ? null, xz
+, pkgconfig, boehmgc, perlPackages, libsodium, aws-sdk-cpp, brotli, readline
+, autoreconfHook, autoconf-archive, bison, flex, libxml2, libxslt, docbook5, docbook5_xsl
 , storeDir ? "/nix/store"
 , stateDir ? "/nix/var"
+, confDir ? "/etc"
 }:
 
 let
 
-  common = { name, src }: stdenv.mkDerivation rec {
+  common = { name, suffix ? "", src, fromGit ? false }: stdenv.mkDerivation rec {
     inherit name src;
+    version = lib.getVersion name;
+
+    VERSION_SUFFIX = lib.optionalString fromGit suffix;
 
     outputs = [ "out" "dev" "man" "doc" ];
 
-    nativeBuildInputs = [ perl pkgconfig ];
+    nativeBuildInputs =
+      [ pkgconfig ]
+      ++ lib.optionals (!lib.versionAtLeast version "1.12pre") [ perl ]
+      ++ lib.optionals fromGit [ autoreconfHook autoconf-archive bison flex libxml2 libxslt docbook5 docbook5_xsl ];
 
     buildInputs = [ curl openssl sqlite xz ]
-      ++ lib.optional (stdenv.isLinux || stdenv.isDarwin) libsodium;
+      ++ lib.optional (stdenv.isLinux || stdenv.isDarwin) libsodium
+      ++ lib.optionals fromGit [ brotli readline ] # Since 1.12
+      ++ lib.optional ((stdenv.isLinux || stdenv.isDarwin) && lib.versionAtLeast version "1.12pre")
+          (aws-sdk-cpp.override {
+            apis = ["s3"];
+            customMemoryManagement = false;
+          });
 
     propagatedBuildInputs = [ boehmgc ];
 
@@ -28,14 +42,17 @@ let
       '';
 
     configureFlags =
-      ''
-        --with-store-dir=${storeDir} --localstatedir=${stateDir} --sysconfdir=/etc
-        --with-dbi=${perlPackages.DBI}/${perl.libPrefix}
-        --with-dbd-sqlite=${perlPackages.DBDSQLite}/${perl.libPrefix}
-        --with-www-curl=${perlPackages.WWWCurl}/${perl.libPrefix}
-        --disable-init-state
-        --enable-gc
-      '';
+      [ "--with-store-dir=${storeDir}"
+        "--localstatedir=${stateDir}"
+        "--sysconfdir=${confDir}"
+        "--disable-init-state"
+        "--enable-gc"
+      ]
+      ++ lib.optionals (!lib.versionAtLeast version "1.12pre") [
+        "--with-dbi=${perlPackages.DBI}/${perl.libPrefix}"
+        "--with-dbd-sqlite=${perlPackages.DBDSQLite}/${perl.libPrefix}"
+        "--with-www-curl=${perlPackages.WWWCurl}/${perl.libPrefix}"
+      ];
 
     makeFlags = "profiledir=$(out)/etc/profile.d";
 
@@ -81,27 +98,55 @@ let
       license = stdenv.lib.licenses.lgpl2Plus;
       maintainers = [ stdenv.lib.maintainers.eelco ];
       platforms = stdenv.lib.platforms.all;
+      outputsToInstall = [ "out" "man" ];
     };
+
+    passthru = { inherit fromGit; };
+  };
+
+  perl-bindings = { nix }: stdenv.mkDerivation {
+    name = "nix-perl-" + nix.version;
+
+    inherit (nix) src;
+
+    postUnpack = "sourceRoot=$sourceRoot/perl";
+
+    nativeBuildInputs =
+      [ perl pkgconfig curl nix libsodium ]
+      ++ lib.optionals nix.fromGit [ autoreconfHook autoconf-archive ];
+
+    configureFlags =
+      [ "--with-dbi=${perlPackages.DBI}/${perl.libPrefix}"
+        "--with-dbd-sqlite=${perlPackages.DBDSQLite}/${perl.libPrefix}"
+      ];
+
+    preConfigure = "export NIX_STATE_DIR=$TMPDIR";
+
+    preBuild = "unset NIX_INDENT_MAKE";
   };
 
 in rec {
 
   nix = nixStable;
 
-  nixStable = common rec {
-    name = "nix-1.11.4";
+  nixStable = (common rec {
+    name = "nix-1.11.9";
     src = fetchurl {
       url = "http://nixos.org/releases/nix/${name}/${name}.tar.xz";
-      sha256 = "937779ed2efaa3dec210250635401980acb99a6fea6d7374fbaea78231b36d34";
+      sha256 = "0e943e277f37843f9196b0293cc31d828613ad7a328ee77cd5be01935dc6e7e1";
     };
-  };
+  }) // { perl-bindings = nixStable; };
 
-  nixUnstable = lib.lowPrio (common rec {
-    name = "nix-1.12pre4523_3b81b26";
-    src = fetchurl {
-      url = "http://hydra.nixos.org/build/33598573/download/4/${name}.tar.xz";
-      sha256 = "0469zv09m85824w4vqj2ag0nciq51xvrvsys7bd5v4nrxihk9991";
+  nixUnstable = (lib.lowPrio (common rec {
+    name = "nix-1.12${suffix}";
+    suffix = "pre5350_7689181e";
+    src = fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nix";
+      rev = "7689181e4f5921d3356736996079ec0310e834c6";
+      sha256 = "08daxcpj18dffsbqs3fckahq06gzs8kl6xr4b4jgijwdl5vqwiri";
     };
-  });
+    fromGit = true;
+  })) // { perl-bindings = perl-bindings { nix = nixUnstable; }; };
 
 }
