@@ -1,14 +1,15 @@
-{ lib, stdenv, fetchurl, pkgconfig, gtk2, gtk3, pango, perl, python, zip, libIDL
+{ lib, stdenv, fetchurl, pkgconfig, gtk2, pango, perl, python, zip, libIDL
 , libjpeg, zlib, dbus, dbus_glib, bzip2, xorg
 , freetype, fontconfig, file, alsaLib, nspr, nss, libnotify
-, yasm, mesa, sqlite, unzip, makeWrapper, pysqlite
+, yasm, mesa, sqlite, unzip, makeWrapper
 , hunspell, libevent, libstartup_notification, libvpx
-, cairo, gstreamer, gst_plugins_base, icu, libpng, jemalloc, libpulseaudio
-, autoconf213, which
-, enableGTK3 ? false
+, cairo, gstreamer, gst-plugins-base, icu, libpng, jemalloc, libpulseaudio
+, autoconf213, which, cargo, rustc, llvm
+, writeScript, xidel, common-updater-scripts, coreutils, gnused, gnugrep, curl
+, enableGTK3 ? false, gtk3, wrapGAppsHook
 , debugBuild ? false
 , # If you want the resulting program to call itself "Firefox" instead
-  # of "Shiretoko" or whatever, enable this option.  However, those
+  # of "Nightly" or whatever, enable this option.  However, those
   # binaries may not be distributed without permission from the
   # Mozilla Foundation, see
   # http://www.mozilla.org/foundation/trademarks/.
@@ -19,7 +20,7 @@ assert stdenv.cc ? libc && stdenv.cc.libc != null;
 
 let
 
-common = { pname, version, sha512 }: stdenv.mkDerivation rec {
+common = { pname, version, sha512, updateScript }: stdenv.mkDerivation rec {
   name = "${pname}-unwrapped-${version}";
 
   src = fetchurl {
@@ -29,21 +30,27 @@ common = { pname, version, sha512 }: stdenv.mkDerivation rec {
     inherit sha512;
   };
 
+  # this patch should no longer be needed in 53
+  # from https://bugzilla.mozilla.org/show_bug.cgi?id=1013882
+  patches = lib.optional debugBuild ./fix-debug.patch;
+
   buildInputs =
-    [ pkgconfig gtk2 perl zip libIDL libjpeg zlib bzip2
-      python dbus dbus_glib pango freetype fontconfig xorg.libXi
+    [ gtk2 zip libIDL libjpeg zlib bzip2
+      dbus dbus_glib pango freetype fontconfig xorg.libXi
       xorg.libX11 xorg.libXrender xorg.libXft xorg.libXt file
       alsaLib nspr nss libnotify xorg.pixman yasm mesa
-      xorg.libXScrnSaver xorg.scrnsaverproto pysqlite
-      xorg.libXext xorg.xextproto sqlite unzip makeWrapper
+      xorg.libXScrnSaver xorg.scrnsaverproto
+      xorg.libXext xorg.xextproto sqlite unzip
       hunspell libevent libstartup_notification libvpx /* cairo */
-      icu libpng jemalloc
+      icu libpng jemalloc llvm
       libpulseaudio # only headers are needed
     ]
     ++ lib.optional enableGTK3 gtk3
-    ++ lib.optionals (!passthru.ffmpegSupport) [ gstreamer gst_plugins_base ];
+    ++ lib.optionals (!passthru.ffmpegSupport) [ gstreamer gst-plugins-base ];
 
-  nativeBuildInputs = [autoconf213 which];
+  nativeBuildInputs =
+    [ autoconf213 which gnused pkgconfig perl python cargo rustc ]
+    ++ lib.optional enableGTK3 wrapGAppsHook;
 
   configureFlags =
     [ "--enable-application=browser"
@@ -56,22 +63,23 @@ common = { pname, version, sha512 }: stdenv.mkDerivation rec {
       "--with-system-libvpx"
       "--with-system-png" # needs APNG support
       "--with-system-icu"
+      "--enable-alsa"
       "--enable-system-ffi"
       "--enable-system-hunspell"
       "--enable-system-pixman"
       "--enable-system-sqlite"
       #"--enable-system-cairo"
       "--enable-startup-notification"
-      "--enable-content-sandbox"            # available since 26.0, but not much info available
+      #"--enable-content-sandbox" # TODO: probably enable after 54
       "--disable-crashreporter"
       "--disable-tests"
       "--disable-necko-wifi" # maybe we want to enable this at some point
       "--disable-updater"
       "--enable-jemalloc"
       "--disable-gconf"
-      "--enable-default-toolkit=cairo-gtk2"
+      "--enable-default-toolkit=cairo-gtk${if enableGTK3 then "3" else "2"}"
+      "--with-google-api-keyfile=ga"
     ]
-    ++ lib.optional enableGTK3 "--enable-default-toolkit=cairo-gtk3"
     ++ (if debugBuild then [ "--enable-debug" "--enable-profiling" ]
                       else [ "--disable-debug" "--enable-release"
                              "--enable-optimize"
@@ -85,6 +93,11 @@ common = { pname, version, sha512 }: stdenv.mkDerivation rec {
       configureScript="$(realpath ./configure)"
       mkdir ../objdir
       cd ../objdir
+
+      # Google API key used by Chromium and Firefox.
+      # Note: These are for NixOS/nixpkgs use ONLY. For your own distribution,
+      # please get your own set of keys.
+      echo "AIzaSyDGi15Zwl11UNe6Y-5XW_upsfyw31qwZPI" >ga
     '';
 
   preInstall =
@@ -100,17 +113,9 @@ common = { pname, version, sha512 }: stdenv.mkDerivation rec {
 
       # Remove SDK cruft. FIXME: move to a separate output?
       rm -rf $out/share/idl $out/include $out/lib/firefox-devel-*
-    '' + lib.optionalString enableGTK3
-      # argv[0] must point to firefox itself
-    ''
-      wrapProgram "$out/bin/firefox" \
-        --argv0 "$out/bin/.firefox-wrapped" \
-        --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH:" \
-        --suffix XDG_DATA_DIRS : "$XDG_ICON_DIRS"
-    '' +
-      # some basic testing
-    ''
-      "$out/bin/firefox" --version
+
+      # Needed to find Mozilla runtime
+      gappsWrapperArgs+=(--argv0 "$out/bin/.firefox-wrapped")
     '';
 
   postFixup =
@@ -121,6 +126,13 @@ common = { pname, version, sha512 }: stdenv.mkDerivation rec {
           "$out"/lib/firefox-*/libxul.so
     '';
 
+  doInstallCheck = true;
+  installCheckPhase =
+    ''
+      # Some basic testing
+      "$out/bin/firefox" --version
+    '';
+
   meta = {
     description = "A web browser" + lib.optionalString (pname == "firefox-esr") " (Extended Support Release)";
     homepage = http://www.mozilla.com/en-US/firefox/;
@@ -129,7 +141,7 @@ common = { pname, version, sha512 }: stdenv.mkDerivation rec {
   };
 
   passthru = {
-    inherit nspr version;
+    inherit nspr version updateScript;
     gtk = gtk2;
     isFirefox3Like = true;
     browserName = "firefox";
@@ -141,14 +153,23 @@ in {
 
   firefox-unwrapped = common {
     pname = "firefox";
-    version = "49.0.1";
-    sha512 = "0b1lmsxazd32xxlbbzg01xam7qc9m7abv6fnl1ixv4dz0xpfc88l1zikskghhdk9snzglyl3lidgnbkli9039g3gf9m06yv77gasmkg";
+    version = "53.0.3";
+    sha512 = "cef5de1e9d6ddf6509a80cd30169fdce701b2fed022979ba5931ccea7b8f77cb644b01984dae028d350e32321cfe2eefc0236c0731bf5a2be12a994fc3fc1118";
+    updateScript = import ./update.nix {
+      attrPath = "firefox-unwrapped";
+      inherit writeScript lib common-updater-scripts xidel coreutils gnused gnugrep curl;
+    };
   };
 
   firefox-esr-unwrapped = common {
     pname = "firefox-esr";
-    version = "45.4.0esr";
-    sha512 = "2955e02f829a10186a8b22320fb97d4b0fc2b45721fcffa6295653fd760d516ae72b5656547685ba1e0699b381e28044996d9ee12a8738842b4e6b8acd296715";
+    version = "52.1.2esr";
+    sha512 = "76362738f6db82a41ff6af4e12a15a302068a5ce10d23739f29375f3279573d0ea43ecee9d2e46fce833a029e437efcfcceab9442c288560f476e0cff2ea9e1d";
+    updateScript = import ./update.nix {
+      attrPath = "firefox-esr-unwrapped";
+      versionSuffix = "esr";
+      inherit writeScript lib common-updater-scripts xidel coreutils gnused gnugrep curl;
+    };
   };
 
 }

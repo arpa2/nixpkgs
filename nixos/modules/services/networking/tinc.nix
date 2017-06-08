@@ -18,7 +18,7 @@ in
 
       networks = mkOption {
         default = { };
-        type = with types; loaOf (submodule {
+        type = with types; attrsOf (submodule {
           options = {
 
             extraConfig = mkOption {
@@ -59,7 +59,7 @@ in
 
             hosts = mkOption {
               default = { };
-              type = types.loaOf types.lines;
+              type = types.attrsOf types.lines;
               description = ''
                 The name of the host in the network as well as the configuration for that host.
                 This name should only contain alphanumerics and underscores.
@@ -68,7 +68,7 @@ in
 
             interfaceType = mkOption {
               default = "tun";
-              type = types.addCheck types.str (n: n == "tun" || n == "tap");
+              type = types.enum [ "tun" "tap" ];
               description = ''
                 The type of virtual interface used for the network connection
               '';

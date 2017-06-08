@@ -3,23 +3,23 @@
 , alsaLib, dbus_libs, cups, libexif, ffmpeg, systemd
 , freetype, fontconfig, libXft, libXrender, libxcb, expat, libXau, libXdmcp
 , libuuid, xz
-, gstreamer, gst_plugins_base, libxml2
+, gstreamer, gst-plugins-base, libxml2
 , glib, gtk2, pango, gdk_pixbuf, cairo, atk, gnome3
 , nss, nspr
 , patchelf
 }:
 
 let
-  version = "1.4";
-  build = "589.29-1";
+  version = "1.9";
+  build = "818.44-1";
   fullVersion = "stable_${version}.${build}";
 
   info = if stdenv.is64bit then {
       arch = "amd64";
-      sha256 = "14sb58qrqnqcpkzacwnwfln558p018zargppxq21p5ic8s92v1g6";
+      sha256 = "0apkwgd98ld5k77nplzmk67nz6mb5pi8jyrnkp96m93mr41b08bq";
     } else {
       arch = "i386";
-      sha256 = "0c4l9ji5xlxwzcjsrvxjkx53j76y777fj6hh7plfkkanlrfkryac";
+      sha256 = "0xyf0z1cnzmb3pv6rgsbd7jdjf1v137priz4kkymr8jgmpq0mmfx ";
     };
 
 in stdenv.mkDerivation rec {
@@ -37,17 +37,18 @@ in stdenv.mkDerivation rec {
   '';
 
   buildInputs =
-    [ stdenv.cc.cc stdenv.cc.libc zlib libX11 libXt libXext libSM libICE
+    [ stdenv.cc.cc stdenv.cc.libc zlib libX11 libXt libXext libSM libICE libxcb
       libXi libXft libXcursor libXfixes libXScrnSaver libXcomposite libXdamage libXtst libXrandr
       atk alsaLib dbus_libs cups gtk2 gdk_pixbuf libexif ffmpeg systemd
       freetype fontconfig libXrender libuuid expat glib nss nspr
-      gstreamer libxml2 gst_plugins_base pango cairo gnome3.gconf
+      gstreamer libxml2 gst-plugins-base pango cairo gnome3.gconf
       patchelf
     ];
 
   libPath = stdenv.lib.makeLibraryPath buildInputs
     + stdenv.lib.optionalString (stdenv.is64bit)
-      (":" + stdenv.lib.makeSearchPathOutput "lib" "lib64" buildInputs);
+      (":" + stdenv.lib.makeSearchPathOutput "lib" "lib64" buildInputs)
+    + ":$out/opt/vivaldi/lib";
 
   buildPhase = ''
     echo "Patching Vivaldi binaries"

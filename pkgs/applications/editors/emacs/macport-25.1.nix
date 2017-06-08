@@ -4,8 +4,10 @@
 }:
 
 stdenv.mkDerivation rec {
-  emacsName = "emacs-25.1";
-  name = "${emacsName}-mac-6.0";
+  emacsVersion = "25.1";
+  emacsName = "emacs-${emacsVersion}";
+  macportVersion = "6.1";
+  name = "emacs-mac-${emacsVersion}-${macportVersion}";
 
   builder = ./builder.sh;
 
@@ -15,8 +17,13 @@ stdenv.mkDerivation rec {
   };
 
   macportSrc = fetchurl {
-    url = "ftp://ftp.math.s.chiba-u.ac.jp/emacs/${name}.tar.gz";
-    sha256 = "2f7a3fd826e6dea541ada04f4a1ff2903a87a1f736b89c5b90bf7bb820568e34";
+    url = "ftp://ftp.math.s.chiba-u.ac.jp/emacs/${emacsName}-mac-${macportVersion}.tar.gz";
+    sha256 = "1zwxh7zsvwcg221mpjh0dhpdas3j9mc5q92pprf8yljl7clqvg62";
+  };
+
+  hiresSrc = fetchurl {
+    url = "ftp://ftp.math.s.chiba-u.ac.jp/emacs/emacs-hires-icons-2.0.tar.gz";
+    sha256 = "1ari8n3y1d4hdl9npg3c3hk27x7cfkwfgyhgzn1vlqkrdah4z434";
   };
 
   enableParallelBuilding = true;
@@ -30,14 +37,20 @@ stdenv.mkDerivation rec {
 
   postUnpack = ''
     mv $sourceRoot $name
-    tar xzf $macportSrc
+    tar xzf $macportSrc -C $name --strip-components=1
     mv $name $sourceRoot
+
+    # extract retina image resources
+    tar xzfv $hiresSrc --strip 1 -C $sourceRoot
   '';
 
   postPatch = ''
     patch -p1 < patch-mac
     substituteInPlace lisp/international/mule-cmds.el \
       --replace /usr/share/locale ${gettext}/share/locale
+
+    # use newer emacs icon
+    cp nextstep/Cocoa/Emacs.base/Contents/Resources/Emacs.icns mac/Emacs.app/Contents/Resources/Emacs.icns
   '';
 
   configureFlags = [
@@ -48,7 +61,7 @@ stdenv.mkDerivation rec {
     "--enable-mac-app=$$out/Applications"
   ];
 
-  CFLAGS = "-O3 -DMAC_OS_X_VERSION_MAX_ALLOWED=1090";
+  CFLAGS = "-O3 -DMAC_OS_X_VERSION_MAX_ALLOWED=1090 -DMAC_OS_X_VERSION_MIN_REQUIRED=1090";
   LDFLAGS = "-O3 -L${ncurses.out}/lib";
 
   postInstall = ''
@@ -81,8 +94,8 @@ stdenv.mkDerivation rec {
       extensions are distributed with GNU Emacs; others are available
       separately.
 
-      This is "Mac port" addition to GNU Emacs 24. This provides a native
-      GUI support for Mac OS X 10.4 - 10.11. Note that Emacs 23 and later
+      This is "Mac port" addition to GNU Emacs 25. This provides a native
+      GUI support for Mac OS X 10.6 - 10.12. Note that Emacs 23 and later
       already contain the official GUI support via the NS (Cocoa) port for
       Mac OS X 10.4 and later. So if it is good enough for you, then you
       don't need to try this.

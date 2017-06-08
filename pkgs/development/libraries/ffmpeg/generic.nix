@@ -55,6 +55,8 @@ let
 
   # Disable dependency that needs fixes before it will work on Darwin or Arm
   disDarwinOrArmFix = origArg: minVer: fixArg: if ((isDarwin || isArm) && reqMin minVer) then fixArg else origArg;
+
+  vaapiSupport = reqMin "0.6" && ((isLinux || isFreeBSD) && !isArm);
 in
 
 assert openglSupport -> mesa != null;
@@ -121,7 +123,7 @@ stdenv.mkDerivation rec {
       "--enable-libmp3lame"
       (ifMinVer "1.2" "--enable-iconv")
       "--enable-libtheora"
-      (ifMinVer "0.6" (enableFeature (isLinux || isFreeBSD) "vaapi"))
+      (ifMinVer "0.6" (enableFeature vaapiSupport "vaapi"))
       "--enable-vdpau"
       "--enable-libvorbis"
       (disDarwinOrArmFix (ifMinVer "0.6" "--enable-libvpx") "0.6" "--disable-libvpx")
@@ -148,7 +150,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     bzip2 fontconfig freetype gnutls libiconv lame libass libogg libtheora
-    libvdpau libvorbis lzma SDL soxr x264 x265 xvidcore zlib libopus
+    libvdpau libvorbis lzma soxr x264 x265 xvidcore zlib libopus
   ] ++ optional openglSupport mesa
     ++ optionals (!isDarwin && !isArm) [ libvpx libpulseaudio ] # Need to be fixed on Darwin and ARM
     ++ optional ((isLinux || isFreeBSD) && !isArm) libva
@@ -197,8 +199,7 @@ stdenv.mkDerivation rec {
   installFlags = [ "install-man" ];
 
   passthru = {
-    vaapiSupport = if reqMin "0.6" && ((isLinux || isFreeBSD) && !isArm) then true else false;
-    inherit vdpauSupport;
+    inherit vaapiSupport vdpauSupport;
   };
 
   meta = with stdenv.lib; {

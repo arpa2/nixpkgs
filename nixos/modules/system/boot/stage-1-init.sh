@@ -8,6 +8,14 @@ export LD_LIBRARY_PATH=@extraUtils@/lib
 export PATH=@extraUtils@/bin
 ln -s @extraUtils@/bin /bin
 
+# Copy the secrets to their needed location
+if [ -d "@extraUtils@/secrets" ]; then
+    for secret in $(cd "@extraUtils@/secrets"; find . -type f); do
+        mkdir -p $(dirname "/$secret")
+        ln -s "@extraUtils@/secrets/$secret" "$secret"
+    done
+fi
+
 # Stop LVM complaining about fd3
 export LVM_SUPPRESS_FD_WARNINGS=true
 
@@ -318,6 +326,8 @@ mountFS() {
     [ "$mountPoint" == "/" ] &&
         [ -f "/mnt-root/etc/NIXOS_LUSTRATE" ] &&
         lustrateRoot "/mnt-root"
+
+    true
 }
 
 lustrateRoot () {
@@ -498,8 +508,7 @@ eval "exec $logOutFd>&- $logErrFd>&-"
 #
 # Storage daemons are distinguished by an @ in front of their command line:
 # https://www.freedesktop.org/wiki/Software/systemd/RootStorageDaemons/
-local pidsToKill="$(pgrep -v -f '^@')"
-for pid in $pidsToKill; do
+for pid in $(pgrep -v -f '^@'); do
     # Make sure we don't kill kernel processes, see #15226 and:
     # http://stackoverflow.com/questions/12213445/identifying-kernel-threads
     readlink "/proc/$pid/exe" &> /dev/null || continue

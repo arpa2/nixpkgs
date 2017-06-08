@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, intltool, pkgconfig, dbus_glib
+{ stdenv, fetchurl, fetchpatch, intltool, pkgconfig, dbus_glib
 , systemd, libgudev, libnl, libuuid, polkit, gnutls, ppp, dhcp, iptables
 , libgcrypt, dnsmasq, bluez5, readline
 , gobjectIntrospection, modemmanager, openresolv, libndp, newt, libsoup
@@ -8,12 +8,14 @@ stdenv.mkDerivation rec {
   name    = "network-manager-${version}";
   pname   = "NetworkManager";
   major   = "1.4";
-  version = "${major}.2";
+  version = "${major}.4";
 
   src = fetchurl {
     url    = "mirror://gnome/sources/${pname}/${major}/${pname}-${version}.tar.xz";
-    sha256 = "a864e347ddf6da8dabd40e0185b8c10a655d4a94b45cbaa2b3bb4b5e8360d204";
+    sha256 = "029k2f1arx1m5hppmr778i9yg34jj68nmji3i89qs06c33rpi4w2";
   };
+
+  outputs = [ "out" "dev" ];
 
   preConfigure = ''
     substituteInPlace configure --replace /usr/bin/uname ${coreutils}/bin/uname
@@ -56,6 +58,11 @@ stdenv.mkDerivation rec {
     "--with-libsoup=yes"
   ];
 
+  patches = [
+    ./PppdPath.patch
+    ./null-dereference.patch
+  ];
+
   buildInputs = [ systemd libgudev libnl libuuid polkit ppp libndp
                   bluez5 dnsmasq gobjectIntrospection modemmanager readline newt libsoup ];
 
@@ -74,7 +81,7 @@ stdenv.mkDerivation rec {
     substituteInPlace $out/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf --replace 'at_console="true"' 'group="networkmanager"'
 
     # rename to network-manager to be in style
-    mv $out/etc/systemd/system/NetworkManager.service $out/etc/systemd/system/network-manager.service 
+    mv $out/etc/systemd/system/NetworkManager.service $out/etc/systemd/system/network-manager.service
 
     # systemd in NixOS doesn't use `systemctl enable`, so we need to establish
     # aliases ourselves.
@@ -86,7 +93,7 @@ stdenv.mkDerivation rec {
     homepage    = http://projects.gnome.org/NetworkManager/;
     description = "Network configuration and management tool";
     license     = licenses.gpl2Plus;
-    maintainers = with maintainers; [ phreedom urkud rickynils domenkozar obadz ];
+    maintainers = with maintainers; [ phreedom rickynils domenkozar obadz ];
     platforms   = platforms.linux;
   };
 }

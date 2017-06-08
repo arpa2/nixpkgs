@@ -44,7 +44,7 @@ let
     libav
     atk
     # Only libraries are needed from those two
-    udev182
+    libudev0-shim
     networkmanager098
 
     # Verified games requirements
@@ -79,7 +79,7 @@ let
     SDL2_ttf
     SDL2_mixer
     gstreamer
-    gst_plugins_base
+    gst-plugins-base
   ] ++ lib.optional (!newStdcpp) gcc48.cc;
 
   overridePkgs = with pkgs; [
@@ -88,6 +88,7 @@ let
     alsaLib
     openalSoft
     libva
+    vulkan-loader
   ] ++ lib.optional newStdcpp gcc.cc;
 
   ourRuntime = if runtimeOnly then []

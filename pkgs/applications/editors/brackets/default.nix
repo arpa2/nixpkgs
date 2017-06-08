@@ -4,22 +4,22 @@ let
   bracketsEnv = buildEnv {
     name = "env-brackets";
     paths = [
-      gtk2 glib gdk_pixbuf stdenv.cc.cc alsaLib nss nspr gconf cups libgcrypt_1_5
-      dbus systemd.lib
+      gtk2 glib gdk_pixbuf stdenv.cc.cc.lib alsaLib nss nspr gconf cups libgcrypt_1_5
+      dbus.lib systemd.lib
     ];
   };
 in
 stdenv.mkDerivation rec {
   name = "brackets-${version}";
-  version = "1.5";
+  version = "1.8";
 
   src = fetchurl {
     url = "https://github.com/adobe/brackets/releases/download/release-${version}/Brackets.Release.${version}.64-bit.deb";
-    sha256 = "1fc8wvh9wbcydd1sw20yfnwlfv7nllb6vrssr6hgn80m7i0zl3db";
+    sha256 = "0b2k0vv1qwmsg1wckp71yrb86zp8zisskmzzvx9ir19bma9jzr42";
     name = "${name}.deb";
   };
 
-  phases = [ "installPhase" ];
+  phases = [ "installPhase" "fixupPhase" ];
 
   buildInputs = [ makeWrapper ];
 

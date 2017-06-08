@@ -27,13 +27,15 @@ in stdenv.mkDerivation rec {
     ];
 
   pythonPath = with pythonPackages;
-    [ pycups pycurl dbus-python pygobject3 requests2 ];
+    [ pycups pycurl dbus-python pygobject3 requests2 pycairo ];
 
   configureFlags =
     [ "--with-udev-rules"
       "--with-udevdir=$(out)/etc/udev"
       "--with-systemdsystemunitdir=$(out)/etc/systemd/system"
     ];
+
+  stripDebugList = "bin lib etc/udev";
 
   postInstall =
     let

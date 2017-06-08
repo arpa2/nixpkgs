@@ -233,6 +233,7 @@ in
           hydra_logo ${cfg.logo}
         ''}
         gc_roots_dir ${cfg.gcRootsDir}
+        use-substitutes = ${if cfg.useSubstitutes then "1" else "0"}
       '';
 
     environment.systemPackages = [ cfg.package ];
@@ -343,7 +344,7 @@ in
       { wantedBy = [ "multi-user.target" ];
         requires = [ "hydra-init.service" ];
         after = [ "hydra-init.service" "network.target" ];
-        path = [ pkgs.nettools ];
+        path = [ cfg.package pkgs.nettools ];
         environment = env;
         serviceConfig =
           { ExecStart = "@${cfg.package}/bin/hydra-evaluator hydra-evaluator";

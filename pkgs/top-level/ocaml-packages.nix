@@ -18,9 +18,15 @@ let
 
     alcotest = callPackage ../development/ocaml-modules/alcotest {};
 
+    angstrom = callPackage ../development/ocaml-modules/angstrom { };
+
     ansiterminal = callPackage ../development/ocaml-modules/ansiterminal { };
 
+    apron = callPackage ../development/ocaml-modules/apron { };
+
     asn1-combinators = callPackage ../development/ocaml-modules/asn1-combinators { };
+
+    astring = callPackage ../development/ocaml-modules/astring { };
 
     async_extra_p4 = callPackage ../development/ocaml-modules/async_extra { };
 
@@ -47,13 +53,10 @@ let
 
     bolt = callPackage ../development/ocaml-modules/bolt { };
 
-    bitstring_2_0_4 = callPackage ../development/ocaml-modules/bitstring/2.0.4.nix { };
-    bitstring_git   = callPackage ../development/ocaml-modules/bitstring { };
-
     bitstring =
       if lib.versionOlder "4.02" ocaml.version
-      then bitstring_git
-      else bitstring_2_0_4;
+      then callPackage ../development/ocaml-modules/bitstring { }
+      else callPackage ../development/ocaml-modules/bitstring/2.0.4.nix { };
 
     camlidl = callPackage ../development/tools/ocaml/camlidl { };
 
@@ -93,7 +96,10 @@ let
     camomile_0_8_2 = callPackage ../development/ocaml-modules/camomile/0.8.2.nix { };
     camomile = callPackage ../development/ocaml-modules/camomile { };
 
-    camlimages_4_0 = callPackage ../development/ocaml-modules/camlimages/4.0.nix {
+    camlimages_4_0 =
+      if lib.versionOlder "4.02" ocaml.version
+      then null
+      else callPackage ../development/ocaml-modules/camlimages/4.0.nix {
       libpng = pkgs.libpng12;
       giflib = pkgs.giflib_4_1;
     };
@@ -126,6 +132,8 @@ let
 
     containers = callPackage ../development/ocaml-modules/containers { };
 
+    cow = callPackage ../development/ocaml-modules/cow { };
+
     cpdf = callPackage ../development/ocaml-modules/cpdf { };
 
     cppo = callPackage ../development/tools/ocaml/cppo { };
@@ -138,9 +146,13 @@ let
 
     csv = callPackage ../development/ocaml-modules/csv { };
 
+    curses = callPackage ../development/ocaml-modules/curses { };
+
     custom_printf = callPackage ../development/ocaml-modules/custom_printf { };
 
     ctypes = callPackage ../development/ocaml-modules/ctypes { };
+
+    dolmen =  callPackage ../development/ocaml-modules/dolmen { };
 
     dolog = callPackage ../development/ocaml-modules/dolog { };
 
@@ -155,6 +167,8 @@ let
     erm_xml = callPackage ../development/ocaml-modules/erm_xml { };
 
     erm_xmpp = callPackage ../development/ocaml-modules/erm_xmpp { };
+
+    erm_xmpp_0_3 = callPackage ../development/ocaml-modules/erm_xmpp/0.3.nix { };
 
     estring = callPackage ../development/ocaml-modules/estring { };
 
@@ -172,9 +186,13 @@ let
 
     fix = callPackage ../development/ocaml-modules/fix { };
 
+    fmt = callPackage ../development/ocaml-modules/fmt { };
+
     fontconfig = callPackage ../development/ocaml-modules/fontconfig {
       inherit (pkgs) fontconfig;
     };
+
+    fpath = callPackage ../development/ocaml-modules/fpath { };
 
     functory = callPackage ../development/ocaml-modules/functory { };
 
@@ -184,7 +202,12 @@ let
 
     io-page = callPackage ../development/ocaml-modules/io-page { };
 
-    ipaddr = callPackage ../development/ocaml-modules/ipaddr { };
+    ipaddr_p4 = callPackage ../development/ocaml-modules/ipaddr/2.6.1.nix { };
+
+    ipaddr =
+      if lib.versionOlder "4.02" ocaml.version
+      then callPackage ../development/ocaml-modules/ipaddr { }
+      else ipaddr_p4;
 
     iso8601 = callPackage ../development/ocaml-modules/iso8601 { };
 
@@ -241,6 +264,10 @@ let
       llvm = pkgs.llvm_37;
     };
 
+    logs = callPackage ../development/ocaml-modules/logs {
+      lwt = ocaml_lwt;
+    };
+
     macaque = callPackage ../development/ocaml-modules/macaque { };
 
     magic-mime = callPackage ../development/ocaml-modules/magic-mime { };
@@ -257,7 +284,19 @@ let
 
     mlgmp =  callPackage ../development/ocaml-modules/mlgmp { };
 
-    nocrypto =  callPackage ../development/ocaml-modules/nocrypto { };
+    mlgmpidl =  callPackage ../development/ocaml-modules/mlgmpidl { };
+
+    mparser =  callPackage ../development/ocaml-modules/mparser { };
+
+    mtime =  callPackage ../development/ocaml-modules/mtime { };
+
+    nocrypto =  callPackage ../development/ocaml-modules/nocrypto {
+      lwt = ocaml_lwt;
+    };
+
+    notty = callPackage ../development/ocaml-modules/notty {
+      lwt = ocaml_lwt;
+    };
 
     ocaml_batteries = callPackage ../development/ocaml-modules/batteries { };
 
@@ -285,9 +324,13 @@ let
 
     ocamlfuse = callPackage ../development/ocaml-modules/ocamlfuse { };
 
+    ocaml_gettext = callPackage ../development/ocaml-modules/ocaml-gettext { };
+
     ocamlgraph = callPackage ../development/ocaml-modules/ocamlgraph { };
 
     ocaml_http = callPackage ../development/ocaml-modules/http { };
+
+    ocaml_libvirt = callPackage ../development/ocaml-modules/ocaml-libvirt { };
 
     ocamlify = callPackage ../development/tools/ocaml/ocamlify { };
 
@@ -329,22 +372,34 @@ let
 
     ocplib-endian = callPackage ../development/ocaml-modules/ocplib-endian { };
 
+    ocplib-simplex = callPackage ../development/ocaml-modules/ocplib-simplex { };
+
     ocsigen_server = callPackage ../development/ocaml-modules/ocsigen-server { };
 
     ojquery = callPackage ../development/ocaml-modules/ojquery { };
 
+    omd = callPackage ../development/ocaml-modules/omd { };
+
     otfm = callPackage ../development/ocaml-modules/otfm { };
+
+    otr = callPackage ../development/ocaml-modules/otr { };
+
+    owee = callPackage ../development/ocaml-modules/owee { };
 
     ounit = callPackage ../development/ocaml-modules/ounit { };
 
     piqi = callPackage ../development/ocaml-modules/piqi { };
     piqi-ocaml = callPackage ../development/ocaml-modules/piqi-ocaml { };
 
+    ptime = callPackage ../development/ocaml-modules/ptime { };
+
     re2_p4 = callPackage ../development/ocaml-modules/re2 { };
 
     result = callPackage ../development/ocaml-modules/ocaml-result { };
 
     sequence = callPackage ../development/ocaml-modules/sequence { };
+
+    spacetime_lib = callPackage ../development/ocaml-modules/spacetime_lib { };
 
     sqlexpr = callPackage ../development/ocaml-modules/sqlexpr { };
 
@@ -359,6 +414,10 @@ let
     };
 
     textutils_p4 = callPackage ../development/ocaml-modules/textutils { };
+
+    tls = callPackage ../development/ocaml-modules/tls {
+      lwt = ocaml_lwt;
+    };
 
     type_conv_108_08_00 = callPackage ../development/ocaml-modules/type_conv/108.08.00.nix { };
     type_conv_109_60_01 = callPackage ../development/ocaml-modules/type_conv/109.60.01.nix { };
@@ -390,6 +449,8 @@ let
       minimal = false;
     };
 
+    ocb-stubblr = callPackage ../development/ocaml-modules/ocb-stubblr { };
+
     ocurl = callPackage ../development/ocaml-modules/ocurl { };
 
     pa_ounit = callPackage ../development/ocaml-modules/pa_ounit { };
@@ -412,6 +473,8 @@ let
       then callPackage ../development/ocaml-modules/ppx_deriving {}
       else null;
 
+    ppx_import = callPackage ../development/ocaml-modules/ppx_import {};
+
     ppx_tools =
       if lib.versionAtLeast ocaml.version "4.02"
       then callPackage ../development/ocaml-modules/ppx_tools {}
@@ -429,6 +492,8 @@ let
 
     safepass = callPackage ../development/ocaml-modules/safepass { };
 
+    sedlex = callPackage ../development/ocaml-modules/sedlex { };
+
     sqlite3EZ = callPackage ../development/ocaml-modules/sqlite3EZ { };
 
     stringext = callPackage ../development/ocaml-modules/stringext { };
@@ -441,6 +506,8 @@ let
 
     typerep_p4 = callPackage ../development/ocaml-modules/typerep { };
 
+    uchar = callPackage ../development/ocaml-modules/uchar { };
+
     utop = callPackage ../development/tools/ocaml/utop { };
 
     uuidm = callPackage ../development/ocaml-modules/uuidm { };
@@ -452,6 +519,9 @@ let
     uunf = callPackage ../development/ocaml-modules/uunf { };
 
     uri = callPackage ../development/ocaml-modules/uri { };
+    uri_p4 = callPackage ../development/ocaml-modules/uri {
+      legacyVersion = true;
+    };
 
     uuseg = callPackage ../development/ocaml-modules/uuseg { };
     uutf = callPackage ../development/ocaml-modules/uutf { };
@@ -481,51 +551,112 @@ let
 
     buildOcamlJane = callPackage ../development/ocaml-modules/janestreet/buildOcamlJane.nix {};
 
-    ppx_core = callPackage ../development/ocaml-modules/janestreet/ppx-core.nix {};
+    ppx_core =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_core-113_33_01.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-core.nix {};
 
-    ppx_optcomp = callPackage ../development/ocaml-modules/janestreet/ppx-optcomp.nix {};
+    ppx_optcomp =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_optcomp-113_33_01.nix {
+        oasis = ocaml_oasis; }
+      else callPackage ../development/ocaml-modules/janestreet/ppx-optcomp.nix {};
 
     ppx_driver = callPackage ../development/ocaml-modules/janestreet/ppx-driver.nix {};
 
-    ppx_type_conv = callPackage ../development/ocaml-modules/janestreet/ppx-type-conv.nix {};
+    ppx_type_conv =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_type_conv-113_33_02.nix { }
+      else callPackage ../development/ocaml-modules/janestreet/ppx-type-conv.nix {};
 
-    ppx_compare = callPackage ../development/ocaml-modules/janestreet/ppx-compare.nix {};
+    ppx_compare =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_compare-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-compare.nix {};
 
     ppx_here = callPackage ../development/ocaml-modules/janestreet/ppx-here.nix {};
 
-    ppx_sexp_conv = callPackage ../development/ocaml-modules/janestreet/ppx-sexp-conv.nix {};
+    ppx_sexp_conv =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_sexp_conv-113_33_01.nix { }
+      else callPackage ../development/ocaml-modules/janestreet/ppx-sexp-conv.nix {};
 
     ppx_assert = callPackage ../development/ocaml-modules/janestreet/ppx-assert.nix {};
 
-    ppx_inline_test = callPackage ../development/ocaml-modules/janestreet/ppx-inline-test.nix {};
+    ppx_inline_test =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_inline_test-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-inline-test.nix {};
 
-    ppx_bench = callPackage ../development/ocaml-modules/janestreet/ppx-bench.nix {};
+    ppx_bench =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_bench-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-bench.nix {};
 
-    ppx_bin_prot = callPackage ../development/ocaml-modules/janestreet/ppx-bin-prot.nix {};
+    ppx_bin_prot =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_bin_prot-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-bin-prot.nix {};
 
-    ppx_custom_printf = callPackage ../development/ocaml-modules/janestreet/ppx-custom-printf.nix {};
+    ppx_custom_printf =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_custom_printf-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-custom-printf.nix {};
 
-    ppx_enumerate = callPackage ../development/ocaml-modules/janestreet/ppx-enumerate.nix {};
+    ppx_enumerate =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_enumerate-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-enumerate.nix {};
 
-    ppx_fail = callPackage ../development/ocaml-modules/janestreet/ppx-fail.nix {};
+    ppx_fail =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_fail-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-fail.nix {};
 
-    ppx_fields_conv = callPackage ../development/ocaml-modules/janestreet/ppx-fields-conv.nix {};
+    ppx_fields_conv =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_fields_conv-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-fields-conv.nix {};
 
-    ppx_let = callPackage ../development/ocaml-modules/janestreet/ppx-let.nix {};
+    ppx_let =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_let-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-let.nix {};
 
-    ppx_pipebang = callPackage ../development/ocaml-modules/janestreet/ppx-pipebang.nix {};
+    ppx_pipebang =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_pipebang-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-pipebang.nix {};
 
-    ppx_sexp_message = callPackage ../development/ocaml-modules/janestreet/ppx-sexp-message.nix {};
+    ppx_sexp_message =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_sexp_message-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-sexp-message.nix {};
 
-    ppx_sexp_value = callPackage ../development/ocaml-modules/janestreet/ppx-sexp-value.nix {};
+    ppx_sexp_value =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_sexp_value-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-sexp-value.nix {};
 
-    ppx_typerep_conv = callPackage ../development/ocaml-modules/janestreet/ppx-typerep-conv.nix {};
+    ppx_typerep_conv =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_typerep_conv-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-typerep-conv.nix {};
 
-    ppx_variants_conv = callPackage ../development/ocaml-modules/janestreet/ppx-variants-conv.nix {};
+    ppx_variants_conv =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_variants_conv-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-variants-conv.nix {};
 
-    ppx_expect = callPackage ../development/ocaml-modules/janestreet/ppx-expect.nix {};
+    ppx_expect =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_expect-113_33_01.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-expect.nix {};
 
-    ppx_jane = callPackage ../development/ocaml-modules/janestreet/ppx-jane.nix {};
+    ppx_jane =
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/ppx_jane-113_33_00.nix {}
+      else callPackage ../development/ocaml-modules/janestreet/ppx-jane.nix {};
 
 
     # Core sublibs
@@ -540,7 +671,9 @@ let
       else fieldslib_p4;
 
     sexplib =
-      if lib.versionOlder "4.02" ocaml.version
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/sexplib-113_33_00.nix {}
+      else if lib.versionOlder "4.02" ocaml.version
       then callPackage ../development/ocaml-modules/janestreet/sexplib.nix {}
       else sexplib_p4;
 
@@ -555,12 +688,16 @@ let
       else bin_prot_p4;
 
     core_kernel =
-      if lib.versionOlder "4.02" ocaml.version
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/core_kernel-113_33_01.nix {}
+      else if lib.versionOlder "4.02" ocaml.version
       then callPackage ../development/ocaml-modules/janestreet/core_kernel.nix {}
       else core_kernel_p4;
 
     core =
-      if lib.versionOlder "4.02" ocaml.version
+      if lib.versionOlder "4.03" ocaml.version
+      then callPackage ../development/ocaml-modules/janestreet/core-113_33_02.nix {}
+      else if lib.versionOlder "4.02" ocaml.version
       then callPackage ../development/ocaml-modules/janestreet/core.nix {}
       else core_p4;
 
@@ -605,27 +742,14 @@ let
 
     wyrd = callPackage ../tools/misc/wyrd { };
 
-    compcert = callPackage ../development/compilers/compcert ((
-      if system == "x86_64-linux"
-      then { tools = pkgs.pkgsi686Linux.stdenv.cc; }
-      else {}
-    ) // {
-      coq = coq_8_5;
-    });
-
     haxe = callPackage ../development/compilers/haxe { };
 
     ocaml-top = callPackage ../development/tools/ocaml/ocaml-top { };
-
-    opam_1_0_0 = callPackage ../development/tools/ocaml/opam/1.0.0.nix { };
-    opam_1_1 = callPackage ../development/tools/ocaml/opam/1.1.nix { };
-    opam = callPackage ../development/tools/ocaml/opam { };
 
     ocamlnat = callPackage  ../development/ocaml-modules/ocamlnat { };
 
     trv = callPackage ../development/tools/misc/trv { };
 
-    omake = callPackage ../development/tools/ocaml/omake { };
     omake_rc1 = callPackage ../development/tools/ocaml/omake/0.9.8.6-rc1.nix { };
 
     verasco = callPackage ../development/tools/analysis/verasco (
@@ -633,7 +757,7 @@ let
       then { tools = pkgs.pkgsi686Linux.stdenv.cc; }
       else {}
     );
-    
+
     glsurf = callPackage ../applications/science/math/glsurf {
       libpng = pkgs.libpng12;
       giflib = pkgs.giflib_4_1;
@@ -642,7 +766,6 @@ let
 
     google-drive-ocamlfuse = callPackage ../applications/networking/google-drive-ocamlfuse { };
 
-    llpp = callPackage ../applications/misc/llpp { };
 
     monotoneViz = callPackage ../applications/version-management/monotone-viz {
       inherit (pkgs.gnome2) libgnomecanvas glib;
@@ -650,24 +773,6 @@ let
 
     unison = callPackage ../applications/networking/sync/unison {
       enableX11 = config.unison.enableX11 or true;
-    };
-
-    coq = callPackage ../applications/science/logic/coq {
-      camlp5 = camlp5_transitional;
-    };
-
-    coq_HEAD = callPackage ../applications/science/logic/coq/HEAD.nix {
-      camlp5 = camlp5_transitional;
-    };
-
-    coq_8_5 = callPackage ../applications/science/logic/coq/8.5.nix {
-      camlp5 = camlp5_transitional;
-    };
-
-    coq_8_3 = callPackage ../applications/science/logic/coq/8.3.nix {
-      make = pkgs.gnumake3;
-      camlp5 = camlp5_transitional;
-      lablgtk = lablgtk_2_14;
     };
 
     hol_light = callPackage ../applications/science/logic/hol_light {
@@ -684,13 +789,13 @@ let
       camlp5 = camlp5_transitional;
     };
 
-    prooftree = callPackage ../applications/science/logic/prooftree {
-      camlp5 = camlp5_transitional;
-    };
   };
     in lib.fix' (lib.extends overrides packageSet);
 in rec
 {
+
+  inherit mkOcamlPackages;
+
   ocamlPackages_3_08_0 = mkOcamlPackages (callPackage ../development/compilers/ocaml/3.08.0.nix { }) (self: super: { lablgtk = self.lablgtk_2_14; });
 
   ocamlPackages_3_10_0 = mkOcamlPackages (callPackage ../development/compilers/ocaml/3.10.0.nix { }) (self: super: { lablgtk = self.lablgtk_2_14; });
@@ -707,7 +812,9 @@ in rec
 
   ocamlPackages_4_03 = mkOcamlPackages (callPackage ../development/compilers/ocaml/4.03.nix { }) (self: super: { });
 
-  ocamlPackages_latest = ocamlPackages_4_03;
+  ocamlPackages_4_04 = mkOcamlPackages (callPackage ../development/compilers/ocaml/4.04.nix { }) (self: super: { });
 
-  ocamlPackages = ocamlPackages_4_01_0;
+  ocamlPackages_latest = ocamlPackages_4_04;
+
+  ocamlPackages = ocamlPackages_4_02;
 }

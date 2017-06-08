@@ -27,11 +27,15 @@ let
 
   # misc
   debug = import ./debug.nix;
+  generators = import ./generators.nix;
   misc = import ./deprecated.nix;
 
   # domain-specific
   sandbox = import ./sandbox.nix;
   fetchers = import ./fetchers.nix;
+
+  # Eval-time filesystem handling
+  filesystem = import ./filesystem.nix;
 
 in
   { inherit trivial
@@ -39,8 +43,8 @@ in
             customisation maintainers meta sources
             modules options types
             licenses platforms systems
-            debug misc
-            sandbox fetchers;
+            debug generators misc
+            sandbox fetchers filesystem;
   }
   # !!! don't include everything at top-level; perhaps only the most
   # commonly used functions.
