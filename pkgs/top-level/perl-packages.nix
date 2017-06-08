@@ -4561,6 +4561,20 @@ let self = _self // overrides; _self = with self; {
     };
   };
 
+  EncodeDetect = buildPerlPackage rec {
+    name = "Encode-Detect-1.01";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/J/JG/JGMYERS/${name}.tar.gz";
+      sha256 = "834d893aa7db6ce3f158afbd0e432d6ed15a276e0940db0a74be13fd9c4bbbf1";
+    };
+    propagatedBuildInputs = [ ModuleBuild ];
+    meta = {
+      description = "An Encode::Encoding subclass that detects the encoding of data";
+      license = stdenv.lib.licenses.free;
+    };
+  };
+
+
   EncodeEUCJPASCII = buildPerlPackage {
     name = "Encode-EUCJPASCII-0.03";
     src = fetchurl {
@@ -4641,12 +4655,26 @@ let self = _self // overrides; _self = with self; {
   };
 
   Error = buildPerlPackage rec {
-    name = "Error-0.17022";
+    name = "Error-0.17024";
     src = fetchurl {
       url = "mirror://cpan/authors/id/S/SH/SHLOMIF/${name}.tar.gz";
-      sha256 = "1vzpz6syb82ir8svp2wjh95x6lpf01lgkxn2xy60ixrszc24zdya";
+      sha256 = "074db7c783a67b0667eca64a4f6a0c3de94998afc92c01d6453163eb04b9150d";
+    };
+    buildInputs = [ ModuleBuild ];
+    meta = {
+      description = "Error/exception handling in an OO-ish way";
+      license = with stdenv.lib.licenses; [ artistic1 gpl1Plus ];
     };
   };
+
+
+  #Error = buildPerlPackage rec {
+  #  name = "Error-0.17022";
+  #  src = fetchurl {
+  #    url = "mirror://cpan/authors/id/S/SH/SHLOMIF/${name}.tar.gz";
+  #    sha256 = "1vzpz6syb82ir8svp2wjh95x6lpf01lgkxn2xy60ixrszc24zdya";
+  #  };
+  #};
 
   EvalClosure = buildPerlPackage {
     name = "Eval-Closure-0.11";
@@ -6815,6 +6843,32 @@ let self = _self // overrides; _self = with self; {
     };
   };
 
+  IPCountry = buildPerlPackage rec {
+    name = "IP-Country-2.28";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/N/NW/NWETTERS/${name}.tar.gz";
+      sha256 = "88db833a5ab22ed06cb53d6f205725e3b5371b254596053738885e91fa105f75";
+    };
+    propagatedBuildInputs = [ GeographyCountries ];
+    meta = {
+      description = "Fast lookup of country codes from IP addresses";
+      license = stdenv.lib.licenses.mit;
+    };
+  };
+
+  GeographyCountries = buildPerlPackage rec {
+    name = "Geography-Countries-2009041301";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/A/AB/ABIGAIL/${name}.tar.gz";
+      sha256 = "48c42e40e8281ba7c981743a854c48e6def2d51eb0925ea6c96e25c74497f20f";
+    };
+    meta = {
+      description = "2-letter, 3-letter, and numerical codes for countries";
+      license = stdenv.lib.licenses.mit;
+    };
+  };
+
+
   IPCRun = buildPerlPackage {
     name = "IPC-Run-0.92";
     src = fetchurl {
@@ -7810,6 +7864,28 @@ let self = _self // overrides; _self = with self; {
       sha256 = "351ef4104ecb675ecae69008243fae8243d1a7e53c681eeb759e7b781684c8a7";
     };
   };
+
+  MailSPF = buildPerlPackage rec {
+    name = "Mail-SPF-v2.9.0";
+    #src = /root/nixops/Mail-SPF-v2.9.0;
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/J/JM/JMEHNLE/mail-spf/${name}.tar.gz";
+      sha256 = "61cb5915f1c7acc7a931ffc1bfc1291bdfac555e2a46eb2391b995ea9ecb6162";
+    };
+    # remove this patch patches = [ ../development/perl-modules/Mail-SPF.patch ];
+
+    buildInputs = [ ModuleBuild NetDNSResolverProgrammable ];
+    propagatedBuildInputs = [ Error NetAddrIP NetDNS URI ];
+
+    buildPhase = "perl Build.PL --install_base=$out --install_path=\"sbin=$out/bin\"; ./Build build ";
+
+    doCheck = false; # The main test performs network access
+    meta = {
+      description = "An object-oriented implementation of Sender Policy Framework";
+      license = stdenv.lib.licenses.bsd3;
+    };
+  };
+
 
   MailTools = buildPerlPackage rec {
     name = "MailTools-2.14";
@@ -9440,6 +9516,19 @@ let self = _self // overrides; _self = with self; {
   # Deprecated.
   NamespaceClean = self.namespaceclean;
 
+  NetIdent = buildPerlPackage rec {
+    name = "Net-Ident-1.24";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/T/TO/TODDR/${name}.tar.gz";
+      sha256 = "5f5f1142185a67b87406a3fb31f221564f61838a70ef4c07284a66c55e82ad05";
+    };
+    meta = {
+      homepage = http://wiki.github.com/toddr/Net-Ident/;
+      description = "Lookup the username on the remote end of a TCP/IP connection";
+      license = stdenv.lib.licenses.mit;
+    };
+  };
+
   NetAddrIP = buildPerlPackage rec {
     name = "NetAddr-IP-4.079";
     src = fetchurl {
@@ -9596,18 +9685,32 @@ let self = _self // overrides; _self = with self; {
   };
 
   NetDNS = buildPerlPackage rec {
-    name = "Net-DNS-1.05";
+    name = "Net-DNS-1.10";
     src = fetchurl {
       url = "mirror://cpan/authors/id/N/NL/NLNETLABS/${name}.tar.gz";
-      sha256 = "900198014110af96ebac34af019612dd2ddd6af30178600028c3c940d089d5c8";
+      sha256 = "ebe53e7f433138fb9a7845b4edae6b8f4dc227da97eaf6b347584816ec63a525";
     };
     propagatedBuildInputs = [ DigestHMAC ];
-    makeMakerFlags = "--noonline-tests";
     meta = {
       description = "Perl Interface to the Domain Name System";
       license = stdenv.lib.licenses.mit;
     };
   };
+
+
+  #NetDNS = buildPerlPackage rec {
+  #  name = "Net-DNS-1.05";
+  #  src = fetchurl {
+  #    url = "mirror://cpan/authors/id/N/NL/NLNETLABS/${name}.tar.gz";
+  #    sha256 = "900198014110af96ebac34af019612dd2ddd6af30178600028c3c940d089d5c8";
+  #  };
+  #  propagatedBuildInputs = [ DigestHMAC ];
+  #  makeMakerFlags = "--noonline-tests";
+  #  meta = {
+  #    description = "Perl Interface to the Domain Name System";
+  #    license = stdenv.lib.licenses.mit;
+  #  };
+  #};
 
   NetDomainTLD = buildPerlPackage rec {
     name = "Net-Domain-TLD-1.75";
@@ -9705,6 +9808,21 @@ let self = _self // overrides; _self = with self; {
       description = "Check a remote host for reachability";
     };
   };
+
+  NetDNSResolverProgrammable = buildPerlPackage rec {
+    name = "Net-DNS-Resolver-Programmable-v0.003";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/J/JM/JMEHNLE/net-dns-resolver-programmable/${name}.tar.gz";
+      sha256 = "8d402260941f259c83bf1b2564408e75288df028f604136c29da11a9a6a076ec";
+    };
+    buildInputs = [ ModuleBuild ];
+    propagatedBuildInputs = [ NetDNS ];
+    meta = {
+      description = "Programmable DNS resolver class for offline emulation of DNS";
+      license = with stdenv.lib.licenses; [ artistic1 gpl1Plus ];
+    };
+  };
+
 
   NetServer = buildPerlPackage {
     name = "Net-Server-2.007";
@@ -10952,6 +11070,21 @@ let self = _self // overrides; _self = with self; {
       license = with stdenv.lib.licenses; [ artistic1 gpl1Plus ];
     };
   };
+
+  Razor2ClientAgent = buildPerlPackage rec {
+    name = "Razor2-Client-Agent-2.84";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/T/TO/TODDR/${name}.tar.gz";
+      sha256 = "d7c2ed7f347a673b1425e4da7656073d6c52847bc7403bf57e3a404b52f7e501";
+    };
+    propagatedBuildInputs = [ DigestSHA1 URI ];
+    meta = {
+      homepage = http://razor.sourceforge.net/;
+      description = "Collaborative, content-based spam filtering network agent";
+      license = stdenv.lib.licenses.mit;
+    };
+  };
+
 
   Readonly = buildPerlModule rec {
     name = "Readonly-2.05";
